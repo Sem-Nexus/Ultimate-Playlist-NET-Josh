@@ -2,6 +2,7 @@
 
 using System.ComponentModel;
 using AutoMapper;
+using Castle.Core.Internal;
 using CSharpFunctionalExtensions;
 using OfficeOpenXml;
 using UltimatePlaylist.Common.Models;
@@ -48,9 +49,19 @@ namespace UltimatePlaylist.Services.Song
 
         public async Task<Result<PaginatedReadServiceModel<GeneralSongDataListItemReadServiceModel>>> SongsListAsync(Pagination pagination, SongsAnalyticsFilterServiceModel filterServiceModel)
         {
-            var count = await SongStatisticsProcedureRepository.GeneralSongsCount(filterServiceModel);
+            Result<List<GeneralSongDataProcedureView>> songList = await SongStatisticsProcedureRepository.GetGeneralSongsData(pagination, filterServiceModel);
+            int count = 0;
 
-            return await SongStatisticsProcedureRepository.GetGeneralSongsData(pagination, filterServiceModel)
+            if (pagination.SearchValue.IsNullOrEmpty())
+            {
+                count = await SongStatisticsProcedureRepository.GeneralSongsCount(filterServiceModel);
+            }
+            else
+            {
+                count = songList.Value.Count;
+            }
+
+            return songList
                    .Map(songs => Mapper.Map<IReadOnlyList<GeneralSongDataListItemReadServiceModel>>(songs))
                    .Map(songs => new PaginatedReadServiceModel<GeneralSongDataListItemReadServiceModel>(songs, pagination, count));
         }

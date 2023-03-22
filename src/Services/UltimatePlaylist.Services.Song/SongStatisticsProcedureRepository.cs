@@ -60,7 +60,8 @@ namespace UltimatePlaylist.Services.Song
             builder.Append($"@Take = '{pagination?.PageSize ?? 20}',");
             builder.Append($"@SortType = '{pagination?.OrderBy}',");
             builder.Append($"@Genres = '{genres}',");
-            builder.Append($"@Licensor = '{filter.Licensor}'");
+            builder.Append($"@Licensor = '{filter.Licensor}',");
+            builder.Append($"@SearchValue = '{pagination?.SearchValue}'");
 
             var data = await Context
                 .GeneralSongDataProcedureViews
