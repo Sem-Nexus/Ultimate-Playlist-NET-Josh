@@ -62,15 +62,16 @@ namespace UltimatePlaylist.AdminApi
                     webBuilder.ConfigureKestrel(serverOptions =>
                     {
                         serverOptions.Limits.MaxRequestBodySize = int.MaxValue;
-                    }).UseStartup<Startup>();
+                    }).UseStartup<Startup>();                    
                 })
                 .ConfigureAppConfiguration((context, config) =>
                 {
                     if (context.HostingEnvironment.IsProduction())
                     {
                         var builtConfig = config.Build();
+                        Uri urlVault = new Uri("https://kv-ultimate-stage.vault.azure.net/");
                         var secretClient = new SecretClient(
-                            new Uri(builtConfig["VaultUri"]),
+                            urlVault,
                             new DefaultAzureCredential());
                         config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
                     }
