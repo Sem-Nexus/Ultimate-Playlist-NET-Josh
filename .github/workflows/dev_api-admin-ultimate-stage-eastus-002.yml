@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP.Net Core app to Azure Web App - api-mobile-ultimate-stage-eastus-003
+name: Build and deploy ASP.Net Core app to Azure Web App - api-mobile-ultimate-stage-eastus-002
 
 on:
   push:
@@ -53,7 +53,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'api-admin-ultimate-stage-eastus-003'
+          app-name: 'api-admin-ultimate-stage-eastus-002'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3D5A51D85AF548689CED3C27109BF0F0 }}
           package: .
