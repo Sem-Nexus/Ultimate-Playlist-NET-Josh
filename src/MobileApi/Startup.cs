@@ -99,6 +99,13 @@ namespace UltimatePlaylist.MobileApi
                 .BindConfigurationWithValidation<AuthConfig>(Configuration, "Auth");
 
             services.AddAuthentication(jwtOptions);
+            services.AddAuthentication()
+            .AddGoogle(options =>
+            {
+                options.ClientId = Configuration.GetValue<string>("Google:ClientId");
+                options.ClientSecret = Configuration.GetValue<string>("Google:ClientSecret");
+            });
+
             services.AddHangfire(connectionString);
             services.AddSwaggerConfiguration(ApiType.Mobile);
             services.AddFluentValidationRulesToSwagger();
@@ -247,6 +254,8 @@ namespace UltimatePlaylist.MobileApi
             app.SetupSwaggerAndHealth(ApiType.Mobile, Configuration.GetValue<bool>("EnableSwagger"));
             app.SetupHangfire();
             app.SetupApi();
+            app.UseAuthentication();
+            app.UseAuthorization();
             /*
             DailyCashDrawingScheduler.RemoveDaliCashDrawingJobs(recurringJobManager);
             UltimatePayoutGameScheduler.RemoveUltimatePayoutJob(recurringJobManager);

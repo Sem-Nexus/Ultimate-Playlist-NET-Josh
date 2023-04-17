@@ -13,7 +13,7 @@ using UltimatePlaylist.MobileApi.Models.Identity;
 using UltimatePlaylist.Services.Common.Interfaces.Identity;
 using UltimatePlaylist.Services.Common.Models.Identity;
 using static UltimatePlaylist.Common.Mvc.Consts.Consts;
-
+using Google.Apis.Auth;
 #endregion
 
 namespace UltimatePlaylist.MobileApi.Areas.User
@@ -144,6 +144,30 @@ namespace UltimatePlaylist.MobileApi.Areas.User
                 .Finally(BuildEnvelopeResult);
         }
 
+        [HttpPost]
+        [Route("login-google")]
+        public async Task<IActionResult> LoginGoogleAsync([FromBody] GoogleAuthenticationReadServiceModel request)
+        {
+            var payload = await IdentityService.ValidateGoogleToken(request, null);
+            return await IdentityService.LoginGoogleAsync(Mapper.Map<GoogleJsonWebSignature.Payload>(payload.Value))
+                .Map(loginServiceModel => Mapper.Map<AuthenticationReadServiceModel>(loginServiceModel))
+                .Finally(BuildEnvelopeResult);
+        }
+
+        [HttpPost("complete-register")]
+        [ProducesEmptyEnvelope(StatusCodes.Status200OK)]
+        public async Task<IActionResult> CompleteRegisterAsync([FromBody] UserCompleteRegistrationWriteServiceModel request)
+        {
+            var googleTokenRequest = new GoogleAuthenticationReadServiceModel()
+            {
+                Token = request.TokenGoogle
+            };
+            UserCompleteRegistrationWriteServiceModel registerRequest = Mapper.Map<UserCompleteRegistrationWriteServiceModel>(request);
+
+            await IdentityService.ValidateGoogleToken(googleTokenRequest, registerRequest);
+            return await IdentityService.CompleteRegisterAsync(Mapper.Map<UserCompleteRegistrationWriteServiceModel>(registerRequest))
+                .Finally(BuildEnvelopeResult);
+        }
         #endregion
     }
 }

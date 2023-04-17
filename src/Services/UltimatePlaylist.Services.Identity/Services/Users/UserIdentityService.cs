@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using UltimatePlaylist.Common.Config;
 using UltimatePlaylist.Common.Const;
 using UltimatePlaylist.Common.Enums;
+using UltimatePlaylist.Common.Mvc.Exceptions;
 using UltimatePlaylist.Common.Mvc.Interface;
 using UltimatePlaylist.Database.Infrastructure.Entities.Identity;
 using UltimatePlaylist.Database.Infrastructure.Entities.Identity.Specifications;
@@ -20,7 +21,7 @@ using UltimatePlaylist.Database.Infrastructure.Repositories.Interfaces;
 using UltimatePlaylist.Services.Common.Interfaces.Identity;
 using UltimatePlaylist.Services.Common.Models.Identity;
 using UserRole = UltimatePlaylist.Common.Enums.UserRole;
-
+using Google.Apis.Auth;
 #endregion
 
 namespace UltimatePlaylist.Services.Identity.Services.Users
@@ -30,8 +31,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
         #region Private members
 
         private readonly Lazy<ILogger<UserIdentityService>> LoggerProvider;
-        private readonly Lazy<IReadOnlyRepository<GenderEntity>> GenderRepositoryProvider;
-
+        private readonly Lazy<IReadOnlyRepository<GenderEntity>> GenderRepositoryProvider;        
         #endregion
 
         #region Constructor(s)
@@ -149,6 +149,165 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
 
             await SendConfirmationRequestEmail(newUser);
             return Result.Success();
+        }
+
+        public async Task<Result<AuthenticationReadServiceModel>> LoginGoogleAsync(GoogleJsonWebSignature.Payload user)
+        {
+
+            var existingUser = await UserManager.FindByEmailAsync(user.Email);
+            if (existingUser is not null)
+            {
+                if (existingUser.PasswordHash is not null)
+                {
+                    return Result.Failure<AuthenticationReadServiceModel>(ErrorMessages.EmailTaken);
+                }
+
+                if (!existingUser.EmailConfirmed)
+                {
+                    if (existingUser.ZipCode == null || existingUser.BirthDate == DateTime.MinValue)
+                    {
+                        var token = await GenerateAuthenticationResult(existingUser);
+                        return new AuthenticationReadServiceModel
+                        {
+                            Token = token.Value.Token,
+                            RefreshToken = token.Value.RefreshToken,
+                            ConcurrencyStamp = existingUser.ConcurrencyStamp
+                        };
+                    }
+                    else
+                    {
+                        await SendConfirmationRequestEmail(existingUser);
+                        return Result.Failure<AuthenticationReadServiceModel>(ErrorMessages.EmailNotConfirmed);
+
+                    }
+
+                }
+                await UserManager.AddLoginAsync(existingUser, new UserLoginInfo("Google", existingUser.UserName, existingUser.Email));
+                return await GenerateAuthenticationResult(existingUser);
+
+            }
+
+            var gender = await GenderRepository.FirstOrDefaultAsync(new GenderSpecification()
+             .ByExternalId(new Guid("989EE81B-8B8E-4FC9-BFE8-D81F19F8A6D7")));
+            if (gender is null)
+            {
+                throw new LoginException(ErrorType.GenderDoesNotExist);
+            }
+
+            string userName = user.GivenName.Replace(" ", string.Empty);
+            var newUserFromGoogle = new User()
+            {
+                UserName = "TemporaryUserName" + userName,
+                Email = user.Email,
+                Gender = gender
+            };
+
+            var createdUser = await UserManager.CreateAsync(newUserFromGoogle);
+            if (!createdUser.Succeeded)
+            {
+                throw new LoginException(ErrorType.UserNotCreated);
+            }
+
+            existingUser = await UserManager.FindByEmailAsync(user.Email);
+            var tokenData = await GenerateAuthenticationResult(existingUser);
+            return new AuthenticationReadServiceModel
+            {
+                Token = tokenData.Value.Token,
+                RefreshToken = tokenData.Value.RefreshToken,
+                ConcurrencyStamp = existingUser.ConcurrencyStamp
+            };
+        }
+
+        public async Task<Result> CompleteRegisterAsync(UserCompleteRegistrationWriteServiceModel request)
+        {
+
+            var principalClaims = GetPrincipalFromToken(request.Token);
+            var userIdClaim = principalClaims.FindFirst(JwtClaims.Id)?.Value;
+            var userEmailClaim = principalClaims.FindFirst(JwtClaims.Email)?.Value;
+
+            var existingUserWithUniqueUsername = await UserManager.FindByNameAsync(request.Username);
+            if (existingUserWithUniqueUsername is not null)
+            {
+                return Result.Failure(ErrorMessages.UsernameTaken);
+            }
+
+            var gender = await GenderRepository.FirstOrDefaultAsync(new GenderSpecification()
+                .ByExternalId(request.GenderExternalId));
+            if (gender is null)
+            {
+                return Result.Failure(ErrorType.GenderDoesNotExist.ToString());
+            }
+
+            if (string.IsNullOrEmpty(request.PhoneNumber))
+            {
+                request.PhoneNumber = string.Empty;
+            }
+
+            var updatedUser = new User()
+            {
+                Id = Int32.Parse(userIdClaim),
+                UserName = request.Username,
+                Name = request.FirstName,
+                LastName = request.LastName,
+                Email = userEmailClaim,
+                Gender = gender,
+                IsActive = true,
+                ShouldNotificationBeEnabled = true,
+                PhoneNumber = request.PhoneNumber,
+                BirthDate = request.BirthDate,
+                ZipCode = request.ZipCode,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                ConcurrencyStamp = request.ConcurrencyStamp
+            };
+
+            var updateUser = await UserManager.UpdateAsync(updatedUser);
+
+            if (!updateUser.Succeeded)
+            {
+                throw new LoginException(ErrorType.BadRequest);
+            }
+            var roleResult = await UserManager.AddToRoleAsync(updatedUser, UserRole.User.ToString());
+            if (!roleResult.Succeeded)
+            {
+                throw new LoginException(ErrorType.UserCantBeAddedToRole);
+            }
+
+            await SendConfirmationRequestEmail(updatedUser);
+            return Result.Success();
+        }
+
+        public async Task<Result<GoogleJsonWebSignature.Payload>> ValidateGoogleToken(GoogleAuthenticationReadServiceModel request, UserCompleteRegistrationWriteServiceModel registerRequest)
+        {
+            var googleTokenRequest = Mapper.Map<GoogleAuthenticationReadServiceModel>(request);
+            try
+            {
+                GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(googleTokenRequest.Token, new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new List<string> {
+                     "714215492201-g6h6st7jdekseaj3ulq13bjtv3r6u4fb.apps.googleusercontent.com"
+                 }
+                });
+
+                if (registerRequest is not null)
+                {
+                    var principalClaims = GetPrincipalFromToken(registerRequest.Token);
+                    var userEmailClaim = principalClaims.FindFirst(JwtClaims.Email)?.Value;
+                    if (payload.Email == userEmailClaim)
+                    {
+                        return Result.Success(payload);
+                    }
+                    else
+                    {
+                        throw new LoginException(ErrorType.TokenInvalid);
+                    }
+                }
+
+                return Result.Success(payload);
+            }
+            catch (InvalidJwtException ex)
+            {
+                throw new InvalidJwtException(ex.Message);
+            }
         }
 
         #endregion

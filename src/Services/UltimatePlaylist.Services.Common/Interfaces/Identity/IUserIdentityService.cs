@@ -3,7 +3,7 @@
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using UltimatePlaylist.Services.Common.Models.Identity;
-
+using Google.Apis.Auth;
 #endregion
 
 namespace UltimatePlaylist.Services.Common.Interfaces.Identity
@@ -13,7 +13,13 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Identity
         Task<Result<AuthenticationReadServiceModel>> LoginAsync(UserLoginWriteServiceModel userLoginWriteServiceModel);
 
         Task<Result> RegisterAsync(UserRegistrationWriteServiceModel registrationRequest);
+        
+        Task<Result<AuthenticationReadServiceModel>> LoginGoogleAsync(GoogleJsonWebSignature.Payload user);
 
+        Task<Result<GoogleJsonWebSignature.Payload>> ValidateGoogleToken(GoogleAuthenticationReadServiceModel user, UserCompleteRegistrationWriteServiceModel request);
+        
+        Task<Result> CompleteRegisterAsync(UserCompleteRegistrationWriteServiceModel registrationRequest);
+        
         Task<Result<AuthenticationReadServiceModel>> ChangePasswordAsync(ChangePasswordWriteServiceModel request);
 
         Task<Result<AuthenticationReadServiceModel>> RefreshAsync(string token, string refreshToken);
@@ -26,6 +32,6 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Identity
 
         Task<Result> ResetPasswordAsync(string email);
 
-        Task<Result> SendEmailActivationAsync(string email);
+        Task<Result> SendEmailActivationAsync(string email);       
     }
 }
