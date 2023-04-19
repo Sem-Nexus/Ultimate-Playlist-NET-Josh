@@ -10,7 +10,7 @@ namespace UltimatePlaylist.Services.Common.Models.Identity
     {
         public string Token { get; set; }
 
-        public string TokenGoogle { get; set; }
+        public string ExternalToken { get; set; }
 
         public string Username { get; set; }
 
@@ -31,5 +31,7 @@ namespace UltimatePlaylist.Services.Common.Models.Identity
         public bool IsAgeAgreementRead { get; set; }
 
         public virtual string ConcurrencyStamp { get; set; }
+
+        public string Provider { get; set; }
     }
 }

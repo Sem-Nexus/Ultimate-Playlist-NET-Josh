@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using UltimatePlaylist.Services.Common.Models.Identity;
 using Google.Apis.Auth;
+using System.Security.Claims;
 #endregion
 
 namespace UltimatePlaylist.Services.Common.Interfaces.Identity
@@ -14,9 +15,11 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Identity
 
         Task<Result> RegisterAsync(UserRegistrationWriteServiceModel registrationRequest);
         
-        Task<Result<AuthenticationReadServiceModel>> LoginGoogleAsync(GoogleJsonWebSignature.Payload user);
+        Task<Result<AuthenticationReadServiceModel>> LoginGoogleAsync(dynamic user);
 
-        Task<Result<GoogleJsonWebSignature.Payload>> ValidateGoogleToken(GoogleAuthenticationReadServiceModel user, UserCompleteRegistrationWriteServiceModel request);
+        Task<Result<string>> ValidateGoogleToken(GoogleAuthenticationReadServiceModel user, UserCompleteRegistrationWriteServiceModel request);
+        
+        Task<Result<string>> ValidateAppleIdTokenAsync(GoogleAuthenticationReadServiceModel user, UserCompleteRegistrationWriteServiceModel request);
         
         Task<Result> CompleteRegisterAsync(UserCompleteRegistrationWriteServiceModel registrationRequest);
         

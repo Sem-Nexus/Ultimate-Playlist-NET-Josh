@@ -3,5 +3,6 @@
     public class GoogleAuthenticationReadServiceModel
     {
         public string Token { get; set; }
+        public string Provider { get; set; }
     }
 }

@@ -8,6 +8,7 @@ using FluentValidation.AspNetCore;
 using Hangfire;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Scrutor;
 using Serilog;
@@ -104,6 +105,13 @@ namespace UltimatePlaylist.MobileApi
             {
                 options.ClientId = Configuration.GetValue<string>("Google:ClientId");
                 options.ClientSecret = Configuration.GetValue<string>("Google:ClientSecret");
+            })
+            .AddApple(options =>
+            {
+                options.ClientId = Configuration.GetValue<string>("Apple:ClientId");
+                options.TeamId = Configuration.GetValue<string>("Apple:TeamId");
+                options.KeyId = Configuration.GetValue<string>("Apple:KeyId");
+                //options.P8KeyFilePath = Configuration["Apple:P8KeyFilePath"];
             });
 
             services.AddHangfire(connectionString);
@@ -249,7 +257,7 @@ namespace UltimatePlaylist.MobileApi
             app.UseIpRateLimiting();
 
             app.UseExceptionMiddleware();
-            app.UseCors("AllowSelected");
+            app.UseCors("AllowSelected");            
             app.UseSerilogRequestLogging();
             app.SetupSwaggerAndHealth(ApiType.Mobile, Configuration.GetValue<bool>("EnableSwagger"));
             app.SetupHangfire();

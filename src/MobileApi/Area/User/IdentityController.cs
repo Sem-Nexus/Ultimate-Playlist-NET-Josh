@@ -145,13 +145,24 @@ namespace UltimatePlaylist.MobileApi.Areas.User
         }
 
         [HttpPost]
-        [Route("login-google")]
+        [Route("external-login")]
         public async Task<IActionResult> LoginGoogleAsync([FromBody] GoogleAuthenticationReadServiceModel request)
         {
-            var payload = await IdentityService.ValidateGoogleToken(request, null);
-            return await IdentityService.LoginGoogleAsync(Mapper.Map<GoogleJsonWebSignature.Payload>(payload.Value))
-                .Map(loginServiceModel => Mapper.Map<AuthenticationReadServiceModel>(loginServiceModel))
-                .Finally(BuildEnvelopeResult);
+            if (request.Provider == "Google")
+            {
+                var googlePayload = await IdentityService.ValidateGoogleToken(request, null);
+                return await IdentityService.LoginGoogleAsync(Mapper.Map<string>(googlePayload.Value))
+                    .Map(loginServiceModel => Mapper.Map<AuthenticationReadServiceModel>(loginServiceModel))
+                    .Finally(BuildEnvelopeResult);
+            } else
+            {
+                var applePayload = await IdentityService.ValidateAppleIdTokenAsync(request, null);
+                
+                return await IdentityService.LoginGoogleAsync(Mapper.Map<string>(applePayload.Value))
+                    .Map(loginServiceModel => Mapper.Map<AuthenticationReadServiceModel>(loginServiceModel))
+                    .Finally(BuildEnvelopeResult);
+            }
+           
         }
 
         [HttpPost("complete-register")]
@@ -160,11 +171,18 @@ namespace UltimatePlaylist.MobileApi.Areas.User
         {
             var googleTokenRequest = new GoogleAuthenticationReadServiceModel()
             {
-                Token = request.TokenGoogle
+                Token = request.ExternalToken
             };
             UserCompleteRegistrationWriteServiceModel registerRequest = Mapper.Map<UserCompleteRegistrationWriteServiceModel>(request);
 
-            await IdentityService.ValidateGoogleToken(googleTokenRequest, registerRequest);
+            if (request.Provider == "Google")
+            {
+                await IdentityService.ValidateGoogleToken(googleTokenRequest, registerRequest);
+            }
+            else
+            {
+                await IdentityService.ValidateAppleIdTokenAsync(googleTokenRequest, registerRequest);
+            }
             return await IdentityService.CompleteRegisterAsync(Mapper.Map<UserCompleteRegistrationWriteServiceModel>(registerRequest))
                 .Finally(BuildEnvelopeResult);
         }

@@ -22,6 +22,12 @@ using UltimatePlaylist.Services.Common.Interfaces.Identity;
 using UltimatePlaylist.Services.Common.Models.Identity;
 using UserRole = UltimatePlaylist.Common.Enums.UserRole;
 using Google.Apis.Auth;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using System.Security.Cryptography;
+using System.Security.Claims;
+
 #endregion
 
 namespace UltimatePlaylist.Services.Identity.Services.Users
@@ -31,7 +37,8 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
         #region Private members
 
         private readonly Lazy<ILogger<UserIdentityService>> LoggerProvider;
-        private readonly Lazy<IReadOnlyRepository<GenderEntity>> GenderRepositoryProvider;        
+        private readonly Lazy<IReadOnlyRepository<GenderEntity>> GenderRepositoryProvider;
+        private const string AppleIdKeysEndpoint = "https://appleid.apple.com/auth/keys";
         #endregion
 
         #region Constructor(s)
@@ -151,10 +158,10 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
             return Result.Success();
         }
 
-        public async Task<Result<AuthenticationReadServiceModel>> LoginGoogleAsync(GoogleJsonWebSignature.Payload user)
+        public async Task<Result<AuthenticationReadServiceModel>> LoginGoogleAsync(dynamic user)
         {
-
-            var existingUser = await UserManager.FindByEmailAsync(user.Email);
+ 
+            var existingUser = await UserManager.FindByEmailAsync(user);
             if (existingUser is not null)
             {
                 if (existingUser.PasswordHash is not null)
@@ -220,10 +227,10 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
 
         public async Task<Result> CompleteRegisterAsync(UserCompleteRegistrationWriteServiceModel request)
         {
-
-            var principalClaims = GetPrincipalFromToken(request.Token);
-            var userIdClaim = principalClaims.FindFirst(JwtClaims.Id)?.Value;
-            var userEmailClaim = principalClaims.FindFirst(JwtClaims.Email)?.Value;
+            
+            var claims = GetUserTokenClaims(request.Token);
+            var userIdClaim = claims.Claims.First(claim => claim.Type == "Id").Value;
+            var userEmailClaim = claims.Claims.First(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress").Value;
 
             var existingUserWithUniqueUsername = await UserManager.FindByNameAsync(request.Username);
             if (existingUserWithUniqueUsername is not null)
@@ -276,7 +283,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
             return Result.Success();
         }
 
-        public async Task<Result<GoogleJsonWebSignature.Payload>> ValidateGoogleToken(GoogleAuthenticationReadServiceModel request, UserCompleteRegistrationWriteServiceModel registerRequest)
+        public async Task<Result<string>> ValidateGoogleToken(GoogleAuthenticationReadServiceModel request, UserCompleteRegistrationWriteServiceModel registerRequest)
         {
             var googleTokenRequest = Mapper.Map<GoogleAuthenticationReadServiceModel>(request);
             try
@@ -284,17 +291,18 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                 GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(googleTokenRequest.Token, new GoogleJsonWebSignature.ValidationSettings
                 {
                     Audience = new List<string> {
-                     "714215492201-g6h6st7jdekseaj3ulq13bjtv3r6u4fb.apps.googleusercontent.com"
+                     "714215492201-sn3puh8a0v05415m5jqtlv4obhq2ov2f.apps.googleusercontent.com"
                  }
                 });
 
                 if (registerRequest is not null)
-                {
-                    var principalClaims = GetPrincipalFromToken(registerRequest.Token);
-                    var userEmailClaim = principalClaims.FindFirst(JwtClaims.Email)?.Value;
-                    if (payload.Email == userEmailClaim)
+                { 
+                    var claims = GetUserTokenClaims(registerRequest.Token);
+                    var email = claims.Claims.First(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress").Value;
+
+                    if (payload.Email == email)
                     {
-                        return Result.Success(payload);
+                        return Result.Success(payload.Email);
                     }
                     else
                     {
@@ -302,12 +310,86 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                     }
                 }
 
-                return Result.Success(payload);
+                return Result.Success(payload.Email);
             }
             catch (InvalidJwtException ex)
             {
                 throw new InvalidJwtException(ex.Message);
             }
+        }
+
+        public async Task<Result<string>> ValidateAppleIdTokenAsync(GoogleAuthenticationReadServiceModel request, UserCompleteRegistrationWriteServiceModel registerRequest)
+        {
+
+            var tokenRequest = Mapper.Map<GoogleAuthenticationReadServiceModel>(request);
+
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = "https://appleid.apple.com",
+                    ValidAudience = "com.stage.ultimateplaylist.app",
+                    IssuerSigningKeys = await GetPublicKeys()
+                };
+
+                ClaimsPrincipal payload = handler.ValidateToken(tokenRequest.Token, validationParameters, out var validatedToken);
+                var appleClaims = payload.Claims;
+                var appleEmail = appleClaims.First(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress").Value;
+
+                if (registerRequest is not null)
+                {                   
+                    var claims = GetUserTokenClaims(registerRequest.Token);
+                    var email = claims.Claims.First(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress").Value;
+
+                    if (appleEmail == email)
+                    {
+                        return Result.Success(appleEmail);
+                    }
+                    else
+                    {
+                        throw new LoginException(ErrorType.TokenInvalid);
+                    }
+                }
+
+                return Result.Success(appleEmail);
+            }
+            catch (InvalidJwtException ex)
+            {
+                throw new InvalidJwtException(ex.Message);
+            }
+        }
+
+        public static async Task<IEnumerable<SecurityKey>> GetPublicKeys()
+        {
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync(AppleIdKeysEndpoint);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            var jwkSet = JsonConvert.DeserializeObject<JsonWebKeySet>(responseContent);
+
+            var securityKeys = new List<SecurityKey>();
+            foreach (var jwk in jwkSet.Keys)
+            {
+                var rsa = RSA.Create();
+                rsa.ImportParameters(new RSAParameters
+                {
+                    Modulus = Base64UrlEncoder.DecodeBytes(jwk.N),
+                    Exponent = Base64UrlEncoder.DecodeBytes(jwk.E)
+                });
+                securityKeys.Add(new RsaSecurityKey(rsa));
+            }
+
+            return securityKeys;
+        }
+
+        private static JwtSecurityToken GetUserTokenClaims(string Token)
+        {
+            var stream = Token;
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(stream);
+            var tokenS = jsonToken as JwtSecurityToken;
+            return tokenS;
         }
 
         #endregion
