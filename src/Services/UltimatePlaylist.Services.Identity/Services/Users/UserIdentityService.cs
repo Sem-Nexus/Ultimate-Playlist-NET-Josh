@@ -283,9 +283,9 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
             return Result.Success();
         }
 
-        public async Task<Result<string>> ValidateGoogleToken(GoogleAuthenticationReadServiceModel request, UserCompleteRegistrationWriteServiceModel registerRequest)
+        public async Task<Result<string>> ValidateGoogleToken(ExternalAuthenticationReadServiceModel request, UserCompleteRegistrationWriteServiceModel registerRequest)
         {
-            var googleTokenRequest = Mapper.Map<GoogleAuthenticationReadServiceModel>(request);
+            var googleTokenRequest = Mapper.Map<ExternalAuthenticationReadServiceModel>(request);
             try
             {
                 GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(googleTokenRequest.Token, new GoogleJsonWebSignature.ValidationSettings
@@ -318,10 +318,10 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
             }
         }
 
-        public async Task<Result<string>> ValidateAppleIdTokenAsync(GoogleAuthenticationReadServiceModel request, UserCompleteRegistrationWriteServiceModel registerRequest)
+        public async Task<Result<string>> ValidateAppleIdTokenAsync(ExternalAuthenticationReadServiceModel request, UserCompleteRegistrationWriteServiceModel registerRequest)
         {
 
-            var tokenRequest = Mapper.Map<GoogleAuthenticationReadServiceModel>(request);
+            var tokenRequest = Mapper.Map<ExternalAuthenticationReadServiceModel>(request);
 
             try
             {
