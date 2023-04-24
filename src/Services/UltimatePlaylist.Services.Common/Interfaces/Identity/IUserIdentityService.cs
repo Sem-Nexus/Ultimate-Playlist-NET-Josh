@@ -15,11 +15,11 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Identity
 
         Task<Result> RegisterAsync(UserRegistrationWriteServiceModel registrationRequest);
         
-        Task<Result<AuthenticationReadServiceModel>> LoginGoogleAsync(dynamic user);
+        Task<Result<AuthenticationReadServiceModel>> ExternalLoginAsync(dynamic user, string provider);
 
-        Task<Result<string>> ValidateGoogleToken(GoogleAuthenticationReadServiceModel user, UserCompleteRegistrationWriteServiceModel request);
+        Task<Result<string>> ValidateGoogleToken(ExternalAuthenticationReadServiceModel user, UserCompleteRegistrationWriteServiceModel request);
         
-        Task<Result<string>> ValidateAppleIdTokenAsync(GoogleAuthenticationReadServiceModel user, UserCompleteRegistrationWriteServiceModel request);
+        Task<Result<string>> ValidateAppleIdTokenAsync(ExternalAuthenticationReadServiceModel user, UserCompleteRegistrationWriteServiceModel request);
         
         Task<Result> CompleteRegisterAsync(UserCompleteRegistrationWriteServiceModel registrationRequest);
         

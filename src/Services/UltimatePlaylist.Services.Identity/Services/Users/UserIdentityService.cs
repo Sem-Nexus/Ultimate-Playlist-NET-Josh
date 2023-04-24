@@ -158,7 +158,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
             return Result.Success();
         }
 
-        public async Task<Result<AuthenticationReadServiceModel>> LoginGoogleAsync(dynamic user)
+        public async Task<Result<AuthenticationReadServiceModel>> ExternalLoginAsync(dynamic user, string provider)
         {
  
             var existingUser = await UserManager.FindByEmailAsync(user);
@@ -189,7 +189,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                     }
 
                 }
-                await UserManager.AddLoginAsync(existingUser, new UserLoginInfo("Google", existingUser.UserName, existingUser.Email));
+                await UserManager.AddLoginAsync(existingUser, new UserLoginInfo(provider, existingUser.UserName, existingUser.Email));
                 return await GenerateAuthenticationResult(existingUser);
 
             }
@@ -201,11 +201,10 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                 throw new LoginException(ErrorType.GenderDoesNotExist);
             }
 
-            string userName = user.GivenName.Replace(" ", string.Empty);
             var newUserFromGoogle = new User()
             {
-                UserName = "TemporaryUserName" + userName,
-                Email = user.Email,
+                UserName = "TemporaryUserName" + user,
+                Email = user,
                 Gender = gender
             };
 
@@ -215,7 +214,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                 throw new LoginException(ErrorType.UserNotCreated);
             }
 
-            existingUser = await UserManager.FindByEmailAsync(user.Email);
+            existingUser = await UserManager.FindByEmailAsync(user);
             var tokenData = await GenerateAuthenticationResult(existingUser);
             return new AuthenticationReadServiceModel
             {
@@ -263,6 +262,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                 PhoneNumber = request.PhoneNumber,
                 BirthDate = request.BirthDate,
                 ZipCode = request.ZipCode,
+                ExternalId = Guid.NewGuid(),
                 SecurityStamp = Guid.NewGuid().ToString(),
                 ConcurrencyStamp = request.ConcurrencyStamp
             };
@@ -292,7 +292,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                 {
                     Audience = new List<string> {
                      "714215492201-sn3puh8a0v05415m5jqtlv4obhq2ov2f.apps.googleusercontent.com"
-                 }
+                    }
                 });
 
                 if (registerRequest is not null)

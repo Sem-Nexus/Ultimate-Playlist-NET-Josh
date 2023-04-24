@@ -146,19 +146,18 @@ namespace UltimatePlaylist.MobileApi.Areas.User
 
         [HttpPost]
         [Route("external-login")]
-        public async Task<IActionResult> LoginGoogleAsync([FromBody] GoogleAuthenticationReadServiceModel request)
+        public async Task<IActionResult> ExternalLoginAsync([FromBody] ExternalAuthenticationReadServiceModel request)
         {
             if (request.Provider == "Google")
             {
                 var googlePayload = await IdentityService.ValidateGoogleToken(request, null);
-                return await IdentityService.LoginGoogleAsync(Mapper.Map<string>(googlePayload.Value))
+                return await IdentityService.ExternalLoginAsync(Mapper.Map<string>(googlePayload.Value), null)
                     .Map(loginServiceModel => Mapper.Map<AuthenticationReadServiceModel>(loginServiceModel))
                     .Finally(BuildEnvelopeResult);
             } else
             {
                 var applePayload = await IdentityService.ValidateAppleIdTokenAsync(request, null);
-                
-                return await IdentityService.LoginGoogleAsync(Mapper.Map<string>(applePayload.Value))
+                return await IdentityService.ExternalLoginAsync(Mapper.Map<string>(applePayload.Value), null)
                     .Map(loginServiceModel => Mapper.Map<AuthenticationReadServiceModel>(loginServiceModel))
                     .Finally(BuildEnvelopeResult);
             }
@@ -169,7 +168,7 @@ namespace UltimatePlaylist.MobileApi.Areas.User
         [ProducesEmptyEnvelope(StatusCodes.Status200OK)]
         public async Task<IActionResult> CompleteRegisterAsync([FromBody] UserCompleteRegistrationWriteServiceModel request)
         {
-            var googleTokenRequest = new GoogleAuthenticationReadServiceModel()
+            var googleTokenRequest = new ExternalAuthenticationReadServiceModel()
             {
                 Token = request.ExternalToken
             };
