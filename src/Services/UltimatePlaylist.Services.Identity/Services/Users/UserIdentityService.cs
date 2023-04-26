@@ -291,7 +291,9 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                 GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(googleTokenRequest.Token, new GoogleJsonWebSignature.ValidationSettings
                 {
                     Audience = new List<string> {
-                     "714215492201-sn3puh8a0v05415m5jqtlv4obhq2ov2f.apps.googleusercontent.com"
+                     "714215492201-sn3puh8a0v05415m5jqtlv4obhq2ov2f.apps.googleusercontent.com",
+                     "714215492201-g6h6st7jdekseaj3ulq13bjtv3r6u4fb.apps.googleusercontent.com",
+                     "714215492201-2mejgfgjoqa3o1eib6qfg4evqsh4j1v4.apps.googleusercontent.com"
                     }
                 });
 

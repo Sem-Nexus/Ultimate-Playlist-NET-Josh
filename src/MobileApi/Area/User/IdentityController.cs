@@ -151,13 +151,13 @@ namespace UltimatePlaylist.MobileApi.Areas.User
             if (request.Provider == "Google")
             {
                 var googlePayload = await IdentityService.ValidateGoogleToken(request, null);
-                return await IdentityService.ExternalLoginAsync(Mapper.Map<string>(googlePayload.Value), null)
+                return await IdentityService.ExternalLoginAsync(Mapper.Map<string>(googlePayload.Value), request.Provider)
                     .Map(loginServiceModel => Mapper.Map<AuthenticationReadServiceModel>(loginServiceModel))
                     .Finally(BuildEnvelopeResult);
             } else
             {
                 var applePayload = await IdentityService.ValidateAppleIdTokenAsync(request, null);
-                return await IdentityService.ExternalLoginAsync(Mapper.Map<string>(applePayload.Value), null)
+                return await IdentityService.ExternalLoginAsync(Mapper.Map<string>(applePayload.Value), request.Provider)
                     .Map(loginServiceModel => Mapper.Map<AuthenticationReadServiceModel>(loginServiceModel))
                     .Finally(BuildEnvelopeResult);
             }
