@@ -21,7 +21,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Identity
         
         Task<Result<string>> ValidateAppleIdTokenAsync(ExternalAuthenticationReadServiceModel user, UserCompleteRegistrationWriteServiceModel request);
         
-        Task<Result> CompleteRegisterAsync(UserCompleteRegistrationWriteServiceModel registrationRequest);
+        Task<Result<AuthenticationReadServiceModel>> CompleteRegisterAsync(UserCompleteRegistrationWriteServiceModel registrationRequest);
         
         Task<Result<AuthenticationReadServiceModel>> ChangePasswordAsync(ChangePasswordWriteServiceModel request);
 

@@ -224,7 +224,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
             };
         }
 
-        public async Task<Result> CompleteRegisterAsync(UserCompleteRegistrationWriteServiceModel request)
+        public async Task<Result<AuthenticationReadServiceModel>> CompleteRegisterAsync(UserCompleteRegistrationWriteServiceModel request)
         {
             
             var claims = GetUserTokenClaims(request.Token);
@@ -234,14 +234,14 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
             var existingUserWithUniqueUsername = await UserManager.FindByNameAsync(request.Username);
             if (existingUserWithUniqueUsername is not null)
             {
-                return Result.Failure(ErrorMessages.UsernameTaken);
+                return Result.Failure<AuthenticationReadServiceModel>(ErrorMessages.UsernameTaken);
             }
 
             var gender = await GenderRepository.FirstOrDefaultAsync(new GenderSpecification()
                 .ByExternalId(request.GenderExternalId));
             if (gender is null)
             {
-                return Result.Failure(ErrorType.GenderDoesNotExist.ToString());
+                return Result.Failure<AuthenticationReadServiceModel>(ErrorType.GenderDoesNotExist.ToString());
             }
 
             if (string.IsNullOrEmpty(request.PhoneNumber))
@@ -264,7 +264,8 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                 ZipCode = request.ZipCode,
                 ExternalId = Guid.NewGuid(),
                 SecurityStamp = Guid.NewGuid().ToString(),
-                ConcurrencyStamp = request.ConcurrencyStamp
+                ConcurrencyStamp = request.ConcurrencyStamp,
+                EmailConfirmed = true
             };
 
             var updateUser = await UserManager.UpdateAsync(updatedUser);
@@ -279,8 +280,9 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                 throw new LoginException(ErrorType.UserCantBeAddedToRole);
             }
 
-            await SendConfirmationRequestEmail(updatedUser);
-            return Result.Success();
+            var token = await ExternalLoginAsync(userEmailClaim, request.Provider);
+
+            return token;
         }
 
         public async Task<Result<string>> ValidateGoogleToken(ExternalAuthenticationReadServiceModel request, UserCompleteRegistrationWriteServiceModel registerRequest)
