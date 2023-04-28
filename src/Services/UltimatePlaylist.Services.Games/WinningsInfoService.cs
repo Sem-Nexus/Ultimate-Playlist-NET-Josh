@@ -96,13 +96,14 @@
                             TimeZoneInfo cstZone = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
                             DateTime cstTime = TimeZoneInfo.ConvertTimeFromUtc(timeUtc, cstZone);
                             //if(cstTime.Hour == 23 && cstTime.Minute >= 0 && cstTime.Minute <= 15)
-                            if (cstTime.Hour == 17 && cstTime.Minute >= 0 && cstTime.Minute <= 20)
+                            //if (cstTime.Hour == 17 && cstTime.Minute >= 0 && cstTime.Minute <= 20)
+                            if(true)
                             {
                                 return await UltimatePayoutGameService.GetUltimatePayoutInfoAsync(userExternalId)
                                 .Map(ultimateInfo => new WinnersReadServiceModel()
                                 {
                                     DailyCashDrawingsWinners = dailyCashWinners = new List<WinnerProfileReadServiceModel>(),
-                                    DateTimestamp = DateTime.Now,
+                                    DateTimestamp = cstTime,
                                     UltimatePayoutUserNumbers = new WinnersReadServiceModel().UltimatePayoutUserNumbers,
                                     UltimatePayoutWinner = Mapper.Map<WinnerProfileReadServiceModel>(new WinnersReadServiceModel().UltimatePayoutWinner),
                                     UltimatePayoutWinningNumbers = new WinnersReadServiceModel().UltimatePayoutWinningNumbers,
