@@ -95,9 +95,9 @@
                         {
                             TimeZoneInfo cstZone = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
                             DateTime cstTime = TimeZoneInfo.ConvertTimeFromUtc(timeUtc, cstZone);
-                            //if(cstTime.Hour == 23 && cstTime.Minute >= 0 && cstTime.Minute <= 15)
-                            //if (cstTime.Hour == 17 && cstTime.Minute >= 0 && cstTime.Minute <= 20)
-                            if(true)
+                            if(cstTime.Hour == 23 && cstTime.Minute >= 0 && cstTime.Minute <= 15)
+                            // if (cstTime.Hour == 19 && cstTime.Minute >= 0 && cstTime.Minute <= 20)
+                            // if(true)
                             {
                                 return await UltimatePayoutGameService.GetUltimatePayoutInfoAsync(userExternalId)
                                 .Map(ultimateInfo => new WinnersReadServiceModel()
