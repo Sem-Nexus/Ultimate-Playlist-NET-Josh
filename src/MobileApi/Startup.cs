@@ -264,13 +264,19 @@ namespace UltimatePlaylist.MobileApi
             app.SetupApi();
             app.UseAuthentication();
             app.UseAuthorization();
-            /*
+
             DailyCashDrawingScheduler.RemoveDaliCashDrawingJobs(recurringJobManager);
+            DailyCashTicketsServiceAndRaffleScheduler.RemoveDaliCashDrawingJobs(recurringJobManager);
             UltimatePayoutGameScheduler.RemoveUltimatePayoutJob(recurringJobManager);
             UltimatePayoutGameRewardScheduler.RemoveUltimatePayoutGameRewardJob(recurringJobManager);
-            */
+            NotificationAfterGamesScheduler.RemoveNotificationAfterGamesJobs(recurringJobManager);
+            NotificationBeforeGamesScheduler.RemoveNotificationBeforeGamesJobs(recurringJobManager);
+            DailyCashTicketsServiceAndRaffleScheduler.RemoveDaliCashDrawingJobs(recurringJobManager);
+
             if (gamesConfig.Value.RunGames)
             {
+                DailyCashDrawingScheduler.SchedulealiCashDrawingJob(recurringJobManager, gamesConfig.Value, playlistConfig.Value);
+                DailyCashTicketsServiceAndRaffleScheduler.SchedulealiCashDrawingJob(recurringJobManager, backgroundJobClient, gamesConfig.Value, playlistConfig.Value);
                 UltimatePayoutGameRewardScheduler.ScheduleUltimatePayoutGameRewardJob(recurringJobManager, playlistConfig.Value.TimeZone);
                 DailyCashDrawingScheduler.SchedulealiCashDrawingJob(recurringJobManager, gamesConfig.Value, playlistConfig.Value);
                 UltimatePayoutGameScheduler.ScheduleUltimatePayoutJob(recurringJobManager, gamesConfig.Value, playlistConfig.Value);

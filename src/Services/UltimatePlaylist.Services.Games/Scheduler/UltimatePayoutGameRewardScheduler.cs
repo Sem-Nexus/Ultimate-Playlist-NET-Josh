@@ -15,7 +15,7 @@ namespace UltimatePlaylist.Services.Games
             recurringJobManager.AddOrUpdate<UltimatePayoutGameRewardJob>(
                 nameof(UltimatePayoutGameRewardJob),
                 p => p.RunUltimatePayoutGameReward(),
-                Cron.Monthly(),
+                Cron.Yearly(),
                 timeZone: TimeZoneInfo.FindSystemTimeZoneById(timeZone));
         }
 

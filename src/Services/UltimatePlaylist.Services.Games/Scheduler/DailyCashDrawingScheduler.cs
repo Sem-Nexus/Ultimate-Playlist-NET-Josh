@@ -1,6 +1,7 @@
 ﻿#region Usings
 
 using Hangfire;
+using System;
 using UltimatePlaylist.Common.Config;
 using UltimatePlaylist.Services.Games.Jobs;
 
@@ -20,16 +21,18 @@ namespace UltimatePlaylist.Services.Games
                 recurringJobManager.AddOrUpdate<DailyCashGameJob>(
                   nameof(DailyCashGameJob),
                   p => p.RunDailyCashGame(),
-                  Cron.Hourly(),
-                  timeZone: TimeZoneInfo.FindSystemTimeZoneById(playlistConfig.TimeZone));
+                Cron.Yearly(),
+                timeZone: TimeZoneInfo.FindSystemTimeZoneById("US Eastern Standard Time"));
+                
+               
             }
             else
             {
                 recurringJobManager.AddOrUpdate<DailyCashGameJob>(
                    nameof(DailyCashGameJob),
                    p => p.RunDailyCashGame(),
-                   Cron.Daily(playlistConfig.StartDateOffSet.Hours, playlistConfig.StartDateOffSet.Minutes),
-                   timeZone: TimeZoneInfo.FindSystemTimeZoneById(playlistConfig.TimeZone));
+                Cron.Yearly(),
+                timeZone: TimeZoneInfo.FindSystemTimeZoneById("US Eastern Standard Time"));
             }
         }
 
