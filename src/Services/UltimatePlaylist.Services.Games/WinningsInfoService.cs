@@ -163,6 +163,7 @@
                         var dailyCashWinners = new List<DailyCashWinnerResponseModel>();
                         var winnings = await WinningRepository.ListAsync(
                             new WinningSpecification()
+                            .ByPastWinnings()
                             .WithGame()
                             .WithUser()
                             .Pagination(new Pagination(pageSize: pageSize, pageNumber: pageNumber, searchValue: String.Empty, orderBy: "created", desc: true)));
