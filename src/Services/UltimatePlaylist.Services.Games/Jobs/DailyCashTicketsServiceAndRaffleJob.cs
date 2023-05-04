@@ -23,6 +23,7 @@ using System;
 using System.Linq;
 using StackExchange.Redis;
 using UltimatePlaylist.Games.Models.Lottery;
+using UltimatePlaylist.Database.Infrastructure.Entities.Games.Specifications;
 #endregion
 
 namespace UltimatePlaylist.Services.Games.Jobs
@@ -90,7 +91,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         #region Public methods
 
-        public async Task<LotteryWinnersReadServiceModel> RunDailyCashGame()
+        public async Task<int> RunDailyCashGame()
         {
             var result = await GetTicketsAndWinners();
 
@@ -98,7 +99,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
             BackgroundJob.ContinueJobWith(jobId, () => AddWinnersAndUseTickets(result), JobContinuationOptions.OnlyOnSucceededState);
 
-            return result;
+            return result.Counter;
         }
 
         public async Task<LotteryWinnersReadServiceModel> GetTicketsAndWinners()
@@ -114,19 +115,15 @@ namespace UltimatePlaylist.Services.Games.Jobs
                     dailyCashTickets = tickets.Value;
                     var winners = RaffleService.GetRaffleWinners(dailyCashTickets, Selections).Value;
 
-                    if (winners.Count() == 0)
+                    if (!winners.Any())
                     {
                         Logger.LogError($"Error getting raffle winners");
                         throw new Exception("Error in GetRaffleWinners");
                     }
-                    if (winners.Count() > 18)
-                    {
-                        winners = winners.Take(18);
-                    }
 
                     var response = new LotteryWinnersReadServiceModel();
                     response.RaffleUserTicketReadServiceModel = winners;
-                    response.LotteryWinnersReadServiceModels = tickets.Value;
+                    response.LotteryWinnersReadServiceModels = dailyCashTickets;
                     response.Counter = winners.Count();
 
                     return response;
@@ -144,7 +141,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         }
 
-        public async Task<DailyCashDrawingEntity> CreateGame()
+        public async Task<long> CreateGame()
         {
             DailyCashDrawingEntity game = default;
 
@@ -165,36 +162,55 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 throw new Exception("Error in CreateGame");
             }
             Game = game;
-            return game;
+            return game.Id;
 
         }
 
-        public async Task<DailyCashDrawingEntity> AddWinnersAndUseTickets(LotteryWinnersReadServiceModel result)
+        public async Task AddWinnersAndUseTickets(LotteryWinnersReadServiceModel result)
+        {          
+            var jobId = BackgroundJob.Schedule(() => AddWinnersForDailyCashAsync(result), TimeSpan.FromMinutes(2));
+            BackgroundJob.ContinueJobWith(jobId, () => UseTicketsAndRemoveArray(result), JobContinuationOptions.OnlyOnSucceededState);
+        }
+
+        public async Task<long> AddWinnersForDailyCashAsync(LotteryWinnersReadServiceModel result)
         {
 
-            if (Game != null)
+            var lastDailyDrawingGame = await DailyCashDrawingRepository.FirstOrDefaultAsync(
+                             new DailyCashDrawingSpecification()
+                             .OrderByCreated(true));
+            Game = Game == null ? lastDailyDrawingGame : Game;
+            try
             {
-                try
-                {
-                    await WinningsService.AddWinnersForDailyCashAsync(result.RaffleUserTicketReadServiceModel.Select(i => i.UserExternalId).ToList(), Game.Id);
-                    await DailyCashTicketsService.UseTickets(result.LotteryWinnersReadServiceModels.Select(t => t.UserTicketExternalId));
-                    await GamesWinningCollectionService.RemoveArray(result.LotteryWinnersReadServiceModels.Select(t => t.UserExternalId));
-
-                    Game.IsFinished = true;
-                    await DailyCashDrawingRepository.UpdateAndSaveAsync(Game);
-                }
-                catch
-                {
-                    throw new Exception("Error in AddWinnersAndUseTickets");
-                }
-
-
+                await WinningsService.AddWinnersForDailyCashAsync(result.RaffleUserTicketReadServiceModel.Select(i => i.UserExternalId).ToList(), Game.Id);              
+            }
+            catch
+            {
+                throw new Exception("Error in AddWinnersForDailyCashAsync");
             }
 
-            return Game;
+            return Game.Id;
+        }
 
+        public async Task<long> UseTicketsAndRemoveArray(LotteryWinnersReadServiceModel result)
+        {
 
+            try
+            {
+                await DailyCashTicketsService.UseTickets(result.LotteryWinnersReadServiceModels.Select(t => t.UserTicketExternalId));
+                await GamesWinningCollectionService.RemoveArray(result.LotteryWinnersReadServiceModels.Select(t => t.UserExternalId));
+                Game.IsFinished = true;
+                await DailyCashDrawingRepository.UpdateAndSaveAsync(Game);
+            }
+            catch
+            {
+                throw new Exception("Error in UseTicketsAndRemoveArray");
+            }
+
+            return Game.Id;
         }
         #endregion
+
+
+     
     }
 }
