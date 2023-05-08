@@ -91,7 +91,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         #region Public methods
 
-        public async Task<int> RunDailyCashGame()
+        public async Task<object> RunDailyCashGame()
         {
             var result = await GetTicketsAndWinners();
 
@@ -99,7 +99,9 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
             BackgroundJob.ContinueJobWith(jobId, () => AddWinnersAndUseTickets(result), JobContinuationOptions.OnlyOnSucceededState);
 
-            return result.Counter;
+            var obj = new { first = result.LotteryWinnersReadServiceModels.Last().Id, last = result.LotteryWinnersReadServiceModels.First().Id };
+
+            return obj;
         }
 
         public async Task<LotteryWinnersReadServiceModel> GetTicketsAndWinners()
@@ -162,30 +164,33 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 throw new Exception("Error in CreateGame");
             }
             Game = game;
-            return game.Id;
+            return Game.Id;
 
         }
 
         public async Task AddWinnersAndUseTickets(LotteryWinnersReadServiceModel result)
-        {          
-            var jobId = BackgroundJob.Schedule(() => AddWinnersForDailyCashAsync(result), TimeSpan.FromMinutes(2));
-            BackgroundJob.ContinueJobWith(jobId, () => UseTicketsAndRemoveArray(result), JobContinuationOptions.OnlyOnSucceededState);
+        {
+
+            var response = await AddWinnersForDailyCashAsync(result);
+
+            var jobId = BackgroundJob.Schedule(() => UseTicketsAndRemoveArray(result), TimeSpan.FromMinutes(2));
+            BackgroundJob.ContinueJobWith(jobId, () => CompleteGame(result), JobContinuationOptions.OnlyOnSucceededState);
+            
         }
 
         public async Task<long> AddWinnersForDailyCashAsync(LotteryWinnersReadServiceModel result)
         {
 
-            var lastDailyDrawingGame = await DailyCashDrawingRepository.FirstOrDefaultAsync(
-                             new DailyCashDrawingSpecification()
-                             .OrderByCreated(true));
-            Game = Game == null ? lastDailyDrawingGame : Game;
-            try
+            if (Game != null)
             {
-                await WinningsService.AddWinnersForDailyCashAsync(result.RaffleUserTicketReadServiceModel.Select(i => i.UserExternalId).ToList(), Game.Id);              
-            }
-            catch
-            {
-                throw new Exception("Error in AddWinnersForDailyCashAsync");
+                try
+                {
+                    await WinningsService.AddWinnersForDailyCashAsync(result.RaffleUserTicketReadServiceModel.Select(i => i.UserExternalId).ToList(), Game.Id);
+                }
+                catch
+                {
+                    throw new Exception("Error in AddWinnersForDailyCashAsync");
+                }
             }
 
             return Game.Id;
@@ -197,9 +202,6 @@ namespace UltimatePlaylist.Services.Games.Jobs
             try
             {
                 await DailyCashTicketsService.UseTickets(result.LotteryWinnersReadServiceModels.Select(t => t.UserTicketExternalId));
-                await GamesWinningCollectionService.RemoveArray(result.LotteryWinnersReadServiceModels.Select(t => t.UserExternalId));
-                Game.IsFinished = true;
-                await DailyCashDrawingRepository.UpdateAndSaveAsync(Game);
             }
             catch
             {
@@ -210,7 +212,22 @@ namespace UltimatePlaylist.Services.Games.Jobs
         }
         #endregion
 
+        public async Task<long> CompleteGame(LotteryWinnersReadServiceModel result)
+        {
+            try
+            {
+                await GamesWinningCollectionService.RemoveArray(result.LotteryWinnersReadServiceModels.Select(t => t.UserExternalId));
+                Game.IsFinished = true;
+                await DailyCashDrawingRepository.UpdateAndSaveAsync(Game);
+            }
+            catch
+            {
+                throw new Exception("Error in CompleteGame");
+            }
+           
 
-     
+            return Game.Id;
+        }
+
     }
 }

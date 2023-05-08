@@ -15,7 +15,7 @@ namespace UltimatePlaylist.Services.Games
             recurringJobManager.AddOrUpdate<UltimatePayoutGameJob>(
                 nameof(UltimatePayoutGameJob),
                 p => p.RunUltimatePayoutGame(),
-                Cron.Daily(playlistConfig.StartDateOffSet.Hours, playlistConfig.StartDateOffSet.Minutes + 5),
+                Cron.Daily(playlistConfig.StartDateOffSet.Hours, playlistConfig.StartDateOffSet.Minutes + 10),
                 timeZone: TimeZoneInfo.FindSystemTimeZoneById(playlistConfig.TimeZone));
         }
 
