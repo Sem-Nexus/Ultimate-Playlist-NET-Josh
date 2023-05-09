@@ -45,5 +45,7 @@
         public const string UsernameCannotContainsSpace = "The username cannot contain space.";
 
         public const string MinimumSongDuration = "The song must be {0} seconds or longer to upload.";
+
+        public const string UsernameCannotSpecialCharacters = "The username cannot contain special characters.";
     }
 }

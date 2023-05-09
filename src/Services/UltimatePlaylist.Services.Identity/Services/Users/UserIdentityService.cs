@@ -249,6 +249,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                 request.PhoneNumber = string.Empty;
             }
 
+            request.Username = request.Username.Trim();
             var updatedUser = new User()
             {
                 Id = Int32.Parse(userIdClaim),
@@ -333,7 +334,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                 var validationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = "https://appleid.apple.com",
-                    ValidAudience = "com.stage.ultimateplaylist.app",
+                    ValidAudience = "com.prod.ultimateplaylist.app",
                     IssuerSigningKeys = await GetPublicKeys()
                 };
 
