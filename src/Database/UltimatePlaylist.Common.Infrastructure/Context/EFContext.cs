@@ -68,6 +68,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
 
         public DbSet<ListenersStatisticsProcedureView> ListenersStatisticsProcedureViews { get; set; }
 
+        public DbSet<TicketEntity> GetDailyTickets { get; set; }
+
         #endregion
 
         #region Builder

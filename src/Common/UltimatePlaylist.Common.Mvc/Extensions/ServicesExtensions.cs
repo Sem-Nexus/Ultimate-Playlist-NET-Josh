@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -87,7 +88,11 @@ namespace UltimatePlaylist.Common.Mvc.Extensions
         #region Hangfire
         public static IServiceCollection AddHangfire(this IServiceCollection services, string connectionString)
         {
-            services.AddHangfire(x => x.UseSqlServerStorage(connectionString));
+            services.AddHangfire(x => x.UseSqlServerStorage(connectionString,
+                new SqlServerStorageOptions
+                {
+                    CommandTimeout = TimeSpan.FromMinutes(10),
+                }));
             services.AddHangfireServer();
             return services;
         }

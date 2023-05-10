@@ -334,7 +334,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                 var validationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = "https://appleid.apple.com",
-                    ValidAudience = "com.prod.ultimateplaylist.app",
+                    ValidAudience = "com.production.ultimateplaylist.app",
                     IssuerSigningKeys = await GetPublicKeys()
                 };
 

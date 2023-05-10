@@ -23,7 +23,7 @@ using System;
 using System.Linq;
 using StackExchange.Redis;
 using UltimatePlaylist.Games.Models.Lottery;
-using UltimatePlaylist.Database.Infrastructure.Entities.Games.Specifications;
+using UltimatePlaylist.Database.Infrastructure.Entities.Ticket;
 #endregion
 
 namespace UltimatePlaylist.Services.Games.Jobs
@@ -46,6 +46,8 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         private readonly Lazy<IGamesWinningCollectionService> GamesWinningCollectionServiceProvider;
 
+        private readonly Lazy<ITicketProcedureRepository> TicketProcedureRepositoryProvider;
+
         private readonly PlaylistConfig PlaylistConfig;
 
         #endregion
@@ -59,6 +61,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
             Lazy<IWinningsService> winningsServiceProvider,
             Lazy<ILogger<DailyCashGameJob>> loggerProvider,
             Lazy<IGamesWinningCollectionService> gamesWinningCollectionServiceProvider,
+            Lazy<ITicketProcedureRepository> ticketProcedureRepositoryProvider,
             IOptions<PlaylistConfig> playlistConfig)
         {
             DailyCashTicketsServiceProvider = dailyCashTicketsServiceProvider;
@@ -67,6 +70,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
             WinningsServiceProvider = winningsServiceProvider;
             LoggerProvider = loggerProvider;
             GamesWinningCollectionServiceProvider = gamesWinningCollectionServiceProvider;
+            TicketProcedureRepositoryProvider = ticketProcedureRepositoryProvider;
             PlaylistConfig = playlistConfig.Value;
         }
         #endregion
@@ -85,6 +89,8 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         private IGamesWinningCollectionService GamesWinningCollectionService => GamesWinningCollectionServiceProvider.Value;
 
+        private ITicketProcedureRepository TicketProcedureRepository => TicketProcedureRepositoryProvider.Value;
+
         public static DailyCashDrawingEntity Game;
 
         #endregion
@@ -96,11 +102,10 @@ namespace UltimatePlaylist.Services.Games.Jobs
             var result = await GetTicketsAndWinners();
 
             var jobId = BackgroundJob.Schedule(() => CreateGame(), TimeSpan.FromMinutes(2));
+            BackgroundJob.ContinueJobWith(jobId, () => AddWinnersAndFilterTickets(result), JobContinuationOptions.OnlyOnSucceededState);
 
-            BackgroundJob.ContinueJobWith(jobId, () => AddWinnersAndUseTickets(result), JobContinuationOptions.OnlyOnSucceededState);
-
-            var obj = new { first = result.LotteryWinnersReadServiceModels.Last().Id, last = result.LotteryWinnersReadServiceModels.First().Id };
-
+            var obj = new { first = result.LotteryWinnersReadServiceModels.Last().Id, last = result.LotteryWinnersReadServiceModels.First().Id};
+            
             return obj;
         }
 
@@ -168,14 +173,11 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         }
 
-        public async Task AddWinnersAndUseTickets(LotteryWinnersReadServiceModel result)
+        public Task AddWinnersAndFilterTickets(LotteryWinnersReadServiceModel result)
         {
-
-            var response = await AddWinnersForDailyCashAsync(result);
-
-            var jobId = BackgroundJob.Schedule(() => UseTicketsAndRemoveArray(result), TimeSpan.FromMinutes(2));
-            BackgroundJob.ContinueJobWith(jobId, () => CompleteGame(result), JobContinuationOptions.OnlyOnSucceededState);
-            
+            var jobId = BackgroundJob.Schedule(() => AddWinnersForDailyCashAsync(result), TimeSpan.FromMinutes(2));            
+            BackgroundJob.ContinueJobWith(jobId, () => GetFilteredTickets(result), JobContinuationOptions.OnlyOnSucceededState);
+            return Task.CompletedTask;
         }
 
         public async Task<long> AddWinnersForDailyCashAsync(LotteryWinnersReadServiceModel result)
@@ -196,19 +198,17 @@ namespace UltimatePlaylist.Services.Games.Jobs
             return Game.Id;
         }
 
-        public async Task<long> UseTicketsAndRemoveArray(LotteryWinnersReadServiceModel result)
+
+        public async Task<object> GetFilteredTickets(LotteryWinnersReadServiceModel result)
         {
 
-            try
-            {
-                await DailyCashTicketsService.UseTickets(result.LotteryWinnersReadServiceModels.Select(t => t.UserTicketExternalId));
-            }
-            catch
-            {
-                throw new Exception("Error in UseTicketsAndRemoveArray");
-            }
+            List<TicketEntity> ticketList = await TicketProcedureRepository.GetDailyTicketsForRaffle();
+            var obj = new { first = ticketList.First().Id, last = ticketList.Last().Id, count = ticketList.Count() };
 
-            return Game.Id;
+            var job = BackgroundJob.Schedule(() => TicketProcedureRepository.MarkDailyTicketsAsUsed(obj.first, obj.last), TimeSpan.FromMinutes(2));
+            BackgroundJob.ContinueJobWith(job, () => CompleteGame(result), JobContinuationOptions.OnlyOnSucceededState);
+
+            return obj;
         }
         #endregion
 
@@ -216,7 +216,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
         {
             try
             {
-                await GamesWinningCollectionService.RemoveArray(result.LotteryWinnersReadServiceModels.Select(t => t.UserExternalId));
+               // await GamesWinningCollectionService.RemoveArray(result.LotteryWinnersReadServiceModels.Select(t => t.UserExternalId));
                 Game.IsFinished = true;
                 await DailyCashDrawingRepository.UpdateAndSaveAsync(Game);
             }

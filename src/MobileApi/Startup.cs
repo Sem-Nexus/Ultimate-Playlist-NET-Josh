@@ -163,7 +163,8 @@ namespace UltimatePlaylist.MobileApi
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped(typeof(IReadOnlyRepository<>), typeof(ReadOnlyRepository<>));
             services.AddScoped<IUserSongRepository, UserSongReposiotry>();
-            services.AddScoped<IPlaylistSQLRepository, PlaylistSQLRepository>(x=> new PlaylistSQLRepository(connectionString));
+            services.AddScoped<ITicketProcedureRepository, TicketProcedureRepository>();
+            services.AddScoped<IPlaylistSQLRepository, PlaylistSQLRepository>(x => new PlaylistSQLRepository(connectionString));
 
             // Rate Limit
             services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
@@ -245,6 +246,7 @@ namespace UltimatePlaylist.MobileApi
             IApplicationBuilder app,
             IWebHostEnvironment env,
             IRecurringJobManager recurringJobManager,
+            IBackgroundJobClient backgroundJobClient,
             IOptions<GamesConfig> gamesConfig,
             IOptions<NotificationConfig> notificationConfig,
             IOptions<PlaylistConfig> playlistConfig)
