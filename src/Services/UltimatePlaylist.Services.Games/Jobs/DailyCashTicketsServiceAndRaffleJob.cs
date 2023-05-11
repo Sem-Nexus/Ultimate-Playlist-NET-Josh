@@ -229,5 +229,10 @@ namespace UltimatePlaylist.Services.Games.Jobs
             return Game.Id;
         }
 
+        public async Task RemoveInternalUsersTickets()
+        {        
+            await TicketProcedureRepository.RemoveInternalUserTickets();
+            return;
+        }
     }
 }

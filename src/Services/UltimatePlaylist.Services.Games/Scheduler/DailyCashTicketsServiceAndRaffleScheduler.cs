@@ -17,6 +17,10 @@ namespace UltimatePlaylist.Services.Games
         {
             playlistConfig.TimeZone = "US Eastern Standard Time";
             recurringJobManager.AddOrUpdate<DailyCashTicketsServiceAndRaffleJob>("Get Tickets and Winners", (p) => p.RunDailyCashGame(),
+              Cron.Daily(playlistConfig.StartDateOffSet.Hours, playlistConfig.StartDateOffSet.Minutes + 1),
+              timeZone: TimeZoneInfo.FindSystemTimeZoneById(playlistConfig.TimeZone));
+
+            recurringJobManager.AddOrUpdate<DailyCashTicketsServiceAndRaffleJob>("Remove Internal Users Tickets", (p) => p.RemoveInternalUsersTickets(),
               Cron.Daily(playlistConfig.StartDateOffSet.Hours, playlistConfig.StartDateOffSet.Minutes),
               timeZone: TimeZoneInfo.FindSystemTimeZoneById(playlistConfig.TimeZone));
         }

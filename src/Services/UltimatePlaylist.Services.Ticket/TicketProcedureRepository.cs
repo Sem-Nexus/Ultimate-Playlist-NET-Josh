@@ -22,11 +22,11 @@ namespace UltimatePlaylist.Services.Song
         public async Task<List<TicketEntity>> GetDailyTicketsForRaffle()
         {
             DateTime startDay = DateTime.Now;
-            DateTime endDay = startDay.AddDays(1);
+            DateTime endDay = DateTime.Now.AddDays(-1);
             var builder = new StringBuilder();
             builder.Append("[dbo].[GetDailyTickets]");
-            builder.Append($"@Start = '{startDay.ToString("yyyy-MM-dd") + " 03:59:59"}',");
-            builder.Append($"@End = '{endDay.ToString("yyyy-MM-dd") + " 04:00:00"}'");
+            builder.Append($"@Start = '{endDay.ToString("yyyy-MM-dd") + " 03:59:59"}',");
+            builder.Append($"@End = '{startDay.ToString("yyyy-MM-dd") + " 04:00:00"}'");
 
             var data = await Context
                 .GetDailyTickets
@@ -45,8 +45,18 @@ namespace UltimatePlaylist.Services.Song
             builder.Append($"@End = '{start}'");
 
             await Context.Database.ExecuteSqlRawAsync(builder.ToString());
-                
-            return ;
+
+            return;
+        }
+
+        public async Task RemoveInternalUserTickets()
+        {
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[RemoveInternalUsersDailyTickets]");
+
+            await Context.Database.ExecuteSqlRawAsync(builder.ToString());
+
+            return;
         }
     }
 }

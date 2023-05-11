@@ -11,5 +11,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Ticket
         Task MarkDailyTicketsAsUsed(long start, long end);
 
         Task<List<TicketEntity>> GetDailyTicketsForRaffle();
+
+        Task RemoveInternalUserTickets();
     }
 }
