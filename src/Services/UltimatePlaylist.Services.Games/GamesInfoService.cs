@@ -163,12 +163,22 @@ namespace UltimatePlaylist.Services.Games
             TimeZoneInfo targetTimezone = TimeZoneInfo.FindSystemTimeZoneById(timezoneId);
             double offsetHours = targetTimezone.GetUtcOffset(DateTime.UtcNow).TotalHours;
             
-            var isCreatedTodayUser = user.Created.AddHours(offsetHours).Date.Equals(nowTime.Date);  
+            var isCreatedTodayUser = user.Created.AddHours(offsetHours).Date.Equals(nowTime.Date);
+
+            Boolean showFlag = true;
+            DateTime timeUtc = DateTime.UtcNow;
+            TimeZoneInfo cstZone = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
+            DateTime cstTime = TimeZoneInfo.ConvertTimeFromUtc(timeUtc, cstZone);
+            if (cstTime.Hour == 23 && cstTime.Minute >= 0 && cstTime.Minute <= 15)
+            {
+                showFlag = false;
+            }
+
             var gamesInfo = new GamesinfoReadServiceModel()
             {
                 NextDrawingDate = timeDiff,
                 NextUltimateDate = timeDiff,
-                IsUnclaimed = false, //isCreatedTodayUser ? false : isUnclaimed is null,
+                IsUnclaimed = showFlag ? (isCreatedTodayUser ? false : isUnclaimed is null) : false,
                 NextUltimatePrize = lastUltimateGame is not null ? lastUltimateGame.Reward : 20000,
                 TicketsCount = avaiableTodayTicketsCount,
                 UnclaimedWinnings = Mapper.Map<List<UserWinningReadServicModel>>(winnings),

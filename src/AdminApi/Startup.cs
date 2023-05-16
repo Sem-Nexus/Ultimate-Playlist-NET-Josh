@@ -26,6 +26,8 @@ using UltimatePlaylist.Services.Common.Interfaces.UserSong;
 using UltimatePlaylist.Services.Song;
 using UltimatePlaylist.Services.UserManagement;
 using UltimatePlaylist.Services.UserSong.Repositories;
+using Microsoft.Extensions.Configuration;
+using UltimatePlaylist.Services.Common.Interfaces.Ticket;
 
 #endregion
 
@@ -90,7 +92,7 @@ namespace UltimatePlaylist.AdminApi
                 .BindConfigurationWithValidation<AuthConfig>(Configuration, "Auth");
 
             services.AddAuthentication(jwtOptions);
-            services.AddHangfire(connectionString);
+            //services.AddHangfire(connectionString);
             services.AddSwaggerConfiguration(ApiType.AdminPanel);
             services.AddFluentValidationRulesToSwagger();
             services.AddHealthChecks();
@@ -134,6 +136,8 @@ namespace UltimatePlaylist.AdminApi
             services.AddScoped<IPlaylistSQLRepository, PlaylistSQLRepository>(x => new PlaylistSQLRepository(connectionString));
             services.AddScoped<ISongStatisticsProcedureRepository, SongStatisticsProcedureRepository>();
             services.AddScoped<IUserManagementProcedureRepository, UserManagementProcedureRepository>();
+            services.AddScoped<ITicketProcedureRepository, TicketProcedureRepository>();
+            services.AddScoped<ISongStatisticsProcedureRepository, SongStatisticsProcedureRepository>();
 
             // Rate Limit
             services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
@@ -210,7 +214,7 @@ namespace UltimatePlaylist.AdminApi
             app.UseCors("AllowSelected");
             app.UseSerilogRequestLogging();
             app.SetupSwaggerAndHealth(ApiType.AdminPanel, Configuration.GetValue<bool>("EnableSwagger"));
-            app.SetupHangfire();
+            //app.SetupHangfire();
             app.SetupApi();
         }
     }
