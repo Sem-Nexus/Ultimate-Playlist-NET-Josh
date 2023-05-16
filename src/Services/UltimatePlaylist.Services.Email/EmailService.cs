@@ -41,5 +41,32 @@ namespace UltimatePlaylist.Services.Email
                 throw new BusinessException($"{ErrorType.ErrorSendingEmail} {body}");
             }
         }
+
+        public async Task SendEmailWithExcelAttachment(string toEmail, string subject, string file)
+        {
+
+            var message = new SendGridMessage
+            {                
+                Subject = subject,
+                From = new EmailAddress(config.SenderEmail),
+                HtmlContent = "<p>Winners List.</p>"
+            };
+
+           //To do add array of emails from config file
+            message.AddTo(new EmailAddress("marco@semnexus.com"));
+            message.AddTo(new EmailAddress("adrian@semnexus.com"));
+            message.AddTo(new EmailAddress("shevy@eliteshout.com"));
+            
+            message.AddAttachment("Winners.xlsx", file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+            var response = await client.SendEmailAsync(message);
+            if (response.StatusCode != HttpStatusCode.Accepted)
+            {
+                var body = await response.Body.ReadAsStringAsync();
+
+                throw new BusinessException($"{ErrorType.ErrorSendingEmail} {body}");
+            }
+
+        }
     }
 }

@@ -30,6 +30,8 @@ using UltimatePlaylist.Services.Common.Interfaces.UserSong;
 using UltimatePlaylist.Services.Games;
 using UltimatePlaylist.Services.Notification;
 using UltimatePlaylist.Services.UserSong.Repositories;
+using UltimatePlaylist.Services.Common.Interfaces.Ticket;
+using UltimatePlaylist.Services.Song;
 
 #endregion
 

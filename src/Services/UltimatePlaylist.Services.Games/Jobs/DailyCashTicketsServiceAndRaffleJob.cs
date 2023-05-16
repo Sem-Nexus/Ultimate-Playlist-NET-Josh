@@ -24,6 +24,21 @@ using System.Linq;
 using StackExchange.Redis;
 using UltimatePlaylist.Games.Models.Lottery;
 using UltimatePlaylist.Database.Infrastructure.Entities.Ticket;
+using OfficeOpenXml;
+using Microsoft.Graph;
+using System.Net.Mail;
+using System.Net.Mime;
+using DocumentFormat.OpenXml.Wordprocessing;
+using UltimatePlaylist.Services.Common.Models.Games;
+using DocumentFormat.OpenXml.Drawing;
+using Azure.Core;
+using System.Web;
+using UltimatePlaylist.Services.Common.Models.Email;
+using UltimatePlaylist.Services.Common.Interfaces;
+using OfficeOpenXml.Style;
+using DocumentFormat.OpenXml.Spreadsheet;
+
+
 #endregion
 
 namespace UltimatePlaylist.Services.Games.Jobs
@@ -42,11 +57,13 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         private readonly Lazy<IWinningsService> WinningsServiceProvider;
 
+        private readonly Lazy<IWinningsInfoService> WinningsInfoServiceProvider;
+
         private readonly Lazy<ILogger<DailyCashGameJob>> LoggerProvider;
-
-        private readonly Lazy<IGamesWinningCollectionService> GamesWinningCollectionServiceProvider;
-
+        
         private readonly Lazy<ITicketProcedureRepository> TicketProcedureRepositoryProvider;
+
+        private readonly IEmailService EmailService;
 
         private readonly PlaylistConfig PlaylistConfig;
 
@@ -56,22 +73,24 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         public DailyCashTicketsServiceAndRaffleJob(
             Lazy<IDailyCashTicketsService> dailyCashTicketsServiceProvider,
-            Lazy<IRaffleService> raffleServiceProvider,
+            Lazy<IRaffleService> raffleServiceProvider, 
             Lazy<IRepository<DailyCashDrawingEntity>> dailyCashDrawingRepositoryProvider,
             Lazy<IWinningsService> winningsServiceProvider,
-            Lazy<ILogger<DailyCashGameJob>> loggerProvider,
-            Lazy<IGamesWinningCollectionService> gamesWinningCollectionServiceProvider,
+            Lazy<ILogger<DailyCashGameJob>> loggerProvider,            
             Lazy<ITicketProcedureRepository> ticketProcedureRepositoryProvider,
+            Lazy<IWinningsInfoService> winningsInfoServiceProvider,
+            IEmailService emailService,
             IOptions<PlaylistConfig> playlistConfig)
         {
             DailyCashTicketsServiceProvider = dailyCashTicketsServiceProvider;
             RaffleServiceProvider = raffleServiceProvider;
             DailyCashDrawingRepositoryProvider = dailyCashDrawingRepositoryProvider;
             WinningsServiceProvider = winningsServiceProvider;
-            LoggerProvider = loggerProvider;
-            GamesWinningCollectionServiceProvider = gamesWinningCollectionServiceProvider;
+            LoggerProvider = loggerProvider;            
             TicketProcedureRepositoryProvider = ticketProcedureRepositoryProvider;
             PlaylistConfig = playlistConfig.Value;
+            WinningsInfoServiceProvider = winningsInfoServiceProvider;
+            EmailService = emailService;
         }
         #endregion
 
@@ -87,11 +106,13 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         private ILogger<DailyCashGameJob> Logger => LoggerProvider.Value;
 
-        private IGamesWinningCollectionService GamesWinningCollectionService => GamesWinningCollectionServiceProvider.Value;
-
         private ITicketProcedureRepository TicketProcedureRepository => TicketProcedureRepositoryProvider.Value;
 
         public static DailyCashDrawingEntity Game;
+
+        private IWinningsInfoService WinningsInfoService => WinningsInfoServiceProvider.Value;
+
+        protected IEmailService EmailServices => EmailService;
 
         #endregion
 
@@ -233,6 +254,59 @@ namespace UltimatePlaylist.Services.Games.Jobs
         {        
             await TicketProcedureRepository.RemoveInternalUserTickets();
             return;
+        }
+
+        public async Task SendEmailWithWinners()
+        {
+            await TicketProcedureRepository.RemoveInternalUserTickets();
+            return;
+        }
+
+        public async Task<List<DailyCashWinnerResponseModel>> CreateExcelAndSendEmail()
+        {
+            
+            Result<List<DailyCashWinnerResponseModel>> winners = await WinningsInfoService.GetDailyWinnersAsync(pageSize: 18, pageNumber: 1);
+
+            if (winners.Value.Any())
+            {
+                using (var package = new ExcelPackage())
+                {
+
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Winners");
+
+                    worksheet.Cells[1, 1].Value = "Amount";
+                    worksheet.Cells[1, 2].Value = "Winner FullName";
+                    worksheet.Cells[1, 3].Value = "Winner Username";                    
+                    worksheet.Cells[1, 4].Value = "Date";
+                    
+                    for (int column = 1; column <= 4; column++)
+                    {
+                        using (var range = worksheet.Cells[1, column, worksheet.Dimension.End.Row, column])
+                        {
+                            range.Style.Font.Bold = true;
+                            range.AutoFitColumns();
+                        }
+                    }
+
+                    for (int i = 0; i < winners.Value.Count; i++)
+                    {
+                        DailyCashWinnerResponseModel data = winners.Value[i];
+                        worksheet.Cells[i + 2, 1].Value = data.Amount;
+                        worksheet.Cells[i + 2, 2].Value = data.WinnerFullName;
+                        worksheet.Cells[i + 2, 3].Value = data.WinnerUsername;
+                        worksheet.Cells[i + 2, 4].Value = DateTime.Parse(data.Date.ToString()).ToString("yyyy-MM-dd");
+                        worksheet.Cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    }
+
+                    byte[] excelBytes = package.GetAsByteArray();
+                    var excelBase64 = Convert.ToBase64String(excelBytes);
+
+                    await EmailServices.SendEmailWithExcelAttachment("", "Winners Results", excelBase64);
+                }
+
+            }
+
+            return winners.Value;
         }
     }
 }
