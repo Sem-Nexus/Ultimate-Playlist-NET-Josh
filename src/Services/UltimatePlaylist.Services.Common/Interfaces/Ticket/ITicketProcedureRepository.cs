@@ -1,6 +1,7 @@
 ﻿#region Usings
 
 using UltimatePlaylist.Database.Infrastructure.Entities.Ticket;
+using UltimatePlaylist.Services.Common.Models.Games;
 
 #endregion
 
@@ -13,5 +14,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Ticket
         Task<List<TicketEntity>> GetDailyTicketsForRaffle();
 
         Task RemoveInternalUserTickets();
+
+        Task<List<WinnersInformationEntity>> GetWinnersData();
     }
 }

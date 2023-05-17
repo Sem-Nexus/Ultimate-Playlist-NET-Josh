@@ -262,24 +262,32 @@ namespace UltimatePlaylist.Services.Games.Jobs
             return;
         }
 
-        public async Task<List<DailyCashWinnerResponseModel>> CreateExcelAndSendEmail()
-        {
-            
-            Result<List<DailyCashWinnerResponseModel>> winners = await WinningsInfoService.GetDailyWinnersAsync(pageSize: 18, pageNumber: 1);
-
-            if (winners.Value.Any())
+        public async Task<List<WinnersInformationEntity>> CreateExcelAndSendEmail()
+        {            
+           
+            List<WinnersInformationEntity> winners = await TicketProcedureRepository.GetWinnersData();
+            if (winners.Any())
             {
                 using (var package = new ExcelPackage())
                 {
 
                     ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Winners");
 
-                    worksheet.Cells[1, 1].Value = "Amount";
-                    worksheet.Cells[1, 2].Value = "Winner FullName";
-                    worksheet.Cells[1, 3].Value = "Winner Username";                    
-                    worksheet.Cells[1, 4].Value = "Date";
-                    
-                    for (int column = 1; column <= 4; column++)
+                    worksheet.Cells[1, 1].Value = "Prize Tier";
+                    worksheet.Cells[1, 2].Value = "Player Id";
+                    worksheet.Cells[1, 3].Value = "User Name";
+                    worksheet.Cells[1, 4].Value = "First Name";
+                    worksheet.Cells[1, 5].Value = "Last Name";
+                    worksheet.Cells[1, 6].Value = "Email";
+                    worksheet.Cells[1, 7].Value = "ZipCode";
+                    worksheet.Cells[1, 8].Value = "Phone Number";
+                    worksheet.Cells[1, 9].Value = "Gender";
+                    worksheet.Cells[1, 10].Value = "Game Id";
+                    worksheet.Cells[1, 11].Value = "BirthDate";
+                    worksheet.Cells[1, 12].Value = "Wins Count";
+                    worksheet.Cells[1, 13].Value = "Total Wins Amount";
+
+                    for (int column = 1; column <= 13; column++)
                     {
                         using (var range = worksheet.Cells[1, column, worksheet.Dimension.End.Row, column])
                         {
@@ -288,13 +296,23 @@ namespace UltimatePlaylist.Services.Games.Jobs
                         }
                     }
 
-                    for (int i = 0; i < winners.Value.Count; i++)
+                    for (int i = 0; i < winners.Count; i++)
                     {
-                        DailyCashWinnerResponseModel data = winners.Value[i];
-                        worksheet.Cells[i + 2, 1].Value = data.Amount;
-                        worksheet.Cells[i + 2, 2].Value = data.WinnerFullName;
-                        worksheet.Cells[i + 2, 3].Value = data.WinnerUsername;
-                        worksheet.Cells[i + 2, 4].Value = DateTime.Parse(data.Date.ToString()).ToString("yyyy-MM-dd");
+                        WinnersInformationEntity data = winners[i];
+                        worksheet.Cells[i + 2, 1].Value = data.PrizeTier;
+                        worksheet.Cells[i + 2, 2].Value = data.PlayerId;
+                        worksheet.Cells[i + 2, 3].Value = data.UserName;
+                        worksheet.Cells[i + 2, 4].Value = data.FirstName;
+                        worksheet.Cells[i + 2, 5].Value = data.LastName;
+                        worksheet.Cells[i + 2, 6].Value = data.Email;
+                        worksheet.Cells[i + 2, 7].Value = data.ZipCode;
+                        worksheet.Cells[i + 2, 8].Value = data.PhoneNumber;
+                        worksheet.Cells[i + 2, 9].Value = data.Gender;
+                        worksheet.Cells[i + 2, 10].Value = data.GameId;
+                        worksheet.Cells[i + 2, 11].Value = DateTime.Parse(data.BirthDate.ToString()).ToString("yyyy-MM-dd");
+                        worksheet.Cells[i + 2, 12].Value = data.WinsCount;
+                        worksheet.Cells[i + 2, 13].Value = data.TotalWinsAmount;
+                        worksheet.Cells.AutoFitColumns();
                         worksheet.Cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                     }
 
@@ -306,7 +324,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
             }
 
-            return winners.Value;
+            return winners;
         }
     }
 }

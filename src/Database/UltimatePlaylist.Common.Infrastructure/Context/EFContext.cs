@@ -11,6 +11,7 @@ using UltimatePlaylist.Database.Infrastructure.Entities.Song;
 using UltimatePlaylist.Database.Infrastructure.Entities.Ticket;
 using UltimatePlaylist.Database.Infrastructure.Entities.UserSongHistory;
 using UltimatePlaylist.Database.Infrastructure.Views;
+using UltimatePlaylist.Services.Common.Models.Games;
 
 #endregion
 
@@ -70,6 +71,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
 
         public DbSet<TicketEntity> GetDailyTickets { get; set; }
 
+        public DbSet<WinnersInformationEntity> GetWinnersInformation { get; set; }
+        
         #endregion
 
         #region Builder
@@ -82,6 +85,7 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
             builder.Entity<LeaderboardRankingByTicketCountView>(eb => eb.ToView("LeaderboardTicketCountRanking"));
             builder.Entity<LeaderboardRankingBySongCountView>(eb => eb.ToView("LeaderboardSongCountRanking"));
             builder.Entity<SongPopularityView>(eb => eb.ToView("SongPopularity"));
+            builder.Entity<WinnersInformationEntity>(eb => eb.ToView("DailyCashWinners"));
         }
 
         #endregion

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using UltimatePlaylist.Database.Infrastructure.Context;
 using UltimatePlaylist.Database.Infrastructure.Entities.Ticket;
 using UltimatePlaylist.Services.Common.Interfaces.Ticket;
+using UltimatePlaylist.Services.Common.Models.Games;
 
 #endregion
 
@@ -57,6 +58,15 @@ namespace UltimatePlaylist.Services.Song
             await Context.Database.ExecuteSqlRawAsync(builder.ToString());
 
             return;
+        }
+        
+        public async Task<List<WinnersInformationEntity>> GetWinnersData()
+        {
+            var data = await Context
+                .GetWinnersInformation                
+                .ToListAsync();
+
+            return data.OrderByDescending(item => item.PrizeTier).ToList();
         }
     }
 }
