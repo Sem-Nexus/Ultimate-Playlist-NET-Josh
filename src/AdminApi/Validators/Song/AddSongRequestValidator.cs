@@ -46,10 +46,10 @@ namespace UltimatePlaylist.AdminApi.Validators.Song
                 .WithMessage(ValidationMessages.CannotBeEmpty)
                 .MustBeSpotifyDeepLink();
 
-            RuleFor(p => p.LinkToAppleMusic)
-                .NotEmpty()
-                .WithMessage(ValidationMessages.CannotBeEmpty)
-                .MustBeAppleMusicDeepLink();
+            //RuleFor(p => p.LinkToAppleMusic)
+            //    .NotEmpty()
+            //    .WithMessage(ValidationMessages.CannotBeEmpty)
+            //    .MustBeAppleMusicDeepLink();
 
             RuleFor(p => p.InstagramUrl)
                 .MustBeInstagramLink();

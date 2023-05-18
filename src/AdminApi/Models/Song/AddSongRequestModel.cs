@@ -27,7 +27,7 @@ namespace UltimatePlaylist.AdminApi.Models.Song
 
         public string LinkToSpotify { get; set; }
 
-        public string LinkToAppleMusic { get; set; }
+        public string? LinkToAppleMusic { get; set; }
 
         public bool? IsNewRelease { get; set; }
 

@@ -249,7 +249,11 @@ namespace UltimatePlaylist.Services.Song
             var songDSPLinks = new List<SongDSPEntity>();
 
             songDSPLinks.Add(GenerateSongDSPEntity(song, addSongWriteServiceModel.LinkToSpotify, DspType.Spotify));
+            if (!String.IsNullOrEmpty(addSongWriteServiceModel.LinkToAppleMusic))
+            {
             songDSPLinks.Add(GenerateSongDSPEntity(song, addSongWriteServiceModel.LinkToAppleMusic, DspType.AppleMusic));
+            }
+            
 
             var addedDSPs = await SongDSPRepository.AddRangeAsync(songDSPLinks);
 
