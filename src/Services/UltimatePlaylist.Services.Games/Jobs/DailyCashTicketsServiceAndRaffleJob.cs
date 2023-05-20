@@ -286,6 +286,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
                     worksheet.Cells[1, 11].Value = "BirthDate";
                     worksheet.Cells[1, 12].Value = "Wins Count";
                     worksheet.Cells[1, 13].Value = "Total Wins Amount";
+                    worksheet.Cells[1, 14].Value = "Register Date";
 
                     for (int column = 1; column <= 13; column++)
                     {
@@ -312,6 +313,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
                         worksheet.Cells[i + 2, 11].Value = DateTime.Parse(data.BirthDate.ToString()).ToString("yyyy-MM-dd");
                         worksheet.Cells[i + 2, 12].Value = data.WinsCount;
                         worksheet.Cells[i + 2, 13].Value = data.TotalWinsAmount;
+                        worksheet.Cells[i + 2, 14].Value = DateTime.Parse(data.RegisterDate.ToString()).ToString("yyyy-MM-dd");
                         worksheet.Cells.AutoFitColumns();
                         worksheet.Cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                     }

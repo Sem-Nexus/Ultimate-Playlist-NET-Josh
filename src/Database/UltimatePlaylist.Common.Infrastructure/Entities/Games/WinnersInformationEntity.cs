@@ -30,6 +30,7 @@ namespace UltimatePlaylist.Services.Common.Models.Games
 
         public decimal TotalWinsAmount { get; set; }
 
+        public DateTime RegisterDate { get; set; }        
 
     }
 }
