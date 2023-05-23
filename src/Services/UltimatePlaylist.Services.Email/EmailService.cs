@@ -50,15 +50,17 @@ namespace UltimatePlaylist.Services.Email
             {                
                 Subject = subject,
                 From = new EmailAddress(config.SenderEmail),
-                HtmlContent = "<p><b>Winners List Date: " + endDay.ToString("yyyy-MM-dd") + "</b></p>"
+                HtmlContent = "<p><b>Winners List Date: " + endDay.ToString("MM-dd-yyyy") + "</b></p>"
             };
 
            //To do add array of emails from config file
             message.AddTo(new EmailAddress("marco@semnexus.com"));
             message.AddTo(new EmailAddress("adrian@semnexus.com"));
             message.AddTo(new EmailAddress("shevy@eliteshout.com"));
-            
-            message.AddAttachment("Winners.xlsx", file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            message.AddTo(new EmailAddress("up@azlottery.gov"));
+            message.AddTo(new EmailAddress("dandrego@azlottery.gov"));
+
+            message.AddAttachment(endDay.ToString("MM-dd-yyyy") +".xlsx", file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
             var response = await client.SendEmailAsync(message);
             if (response.StatusCode != HttpStatusCode.Accepted)
