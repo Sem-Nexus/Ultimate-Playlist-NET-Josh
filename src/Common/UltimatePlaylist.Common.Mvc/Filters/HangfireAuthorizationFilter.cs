@@ -18,31 +18,31 @@ namespace UltimatePlaylist.Common.Mvc.Filters
 
         public bool Authorize(DashboardContext context)
         {
-            //var httpContext = context.GetHttpContext();
+            var httpContext = context.GetHttpContext();
 
-            //var tokenString = httpContext.Request.Query["token"].ToString().Replace("Bearer ", string.Empty);
+            var tokenString = httpContext.Request.Query["token"].ToString().Replace("Bearer ", string.Empty);
 
-            //if (!string.IsNullOrEmpty(tokenString))
-            //{
-            //    if (CheckToken(tokenString, out var expires))
-            //    {
-            //        httpContext.Response.Cookies.Append("hangfireauth", tokenString, new CookieOptions() { Expires = expires });
+            if (!string.IsNullOrEmpty(tokenString))
+            {
+                if (CheckToken(tokenString, out var expires))
+                {
+                    httpContext.Response.Cookies.Append("hangfireauth", tokenString, new CookieOptions() { });
 
-            //        return true;
-            //    }
-            //}
-            //else
-            //{
-            //    var cookies = httpContext.Request.Cookies;
+                    return true;
+                }
+            }
+            else
+            {
+                var cookies = httpContext.Request.Cookies;
 
-            //    if (!string.IsNullOrEmpty(cookies["hangfireauth"]))
-            //    {
-            //        return CheckToken(cookies["hangfireauth"]);
-            //    }
-            //}
+                if (!string.IsNullOrEmpty(cookies["hangfireauth"]))
+                {
+                    return CheckToken(cookies["hangfireauth"]);
+                }
+            }
 
-            //return false;
-            return true;
+            return false;
+            //return true;
         }
 
         #endregion
@@ -62,7 +62,7 @@ namespace UltimatePlaylist.Common.Mvc.Filters
 
             expires = token.ValidTo;
 
-            return token.ValidTo > DateTime.UtcNow && token.Claims.Any(c => c.Type == JwtClaims.Role && c.Value == UserRole.Administrator.ToString());
+            return token.Claims.Any(c => c.Type == JwtClaims.Role && c.Value == UserRole.Administrator.ToString());
         }
 
         #endregion
