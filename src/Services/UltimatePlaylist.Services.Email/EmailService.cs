@@ -45,11 +45,12 @@ namespace UltimatePlaylist.Services.Email
         public async Task SendEmailWithExcelAttachment(string toEmail, string subject, string file)
         {
 
+            DateTime endDay = DateTime.Now.AddDays(-1);           
             var message = new SendGridMessage
             {                
                 Subject = subject,
                 From = new EmailAddress(config.SenderEmail),
-                HtmlContent = "<p>Winners List.</p>"
+                HtmlContent = "<p><b>Winners List Date: " + endDay.ToString("yyyy-MM-dd") + "</b></p>"
             };
 
            //To do add array of emails from config file

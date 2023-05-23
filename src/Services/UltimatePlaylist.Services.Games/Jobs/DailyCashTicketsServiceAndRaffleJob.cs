@@ -268,6 +268,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
             List<WinnersInformationEntity> winners = await TicketProcedureRepository.GetWinnersData();
             if (winners.Any())
             {
+                DateTime endDay = DateTime.Now.AddDays(-1);
                 using (var package = new ExcelPackage())
                 {
 
@@ -283,12 +284,13 @@ namespace UltimatePlaylist.Services.Games.Jobs
                     worksheet.Cells[1, 8].Value = "Phone Number";
                     worksheet.Cells[1, 9].Value = "Gender";
                     worksheet.Cells[1, 10].Value = "Game Id";
-                    worksheet.Cells[1, 11].Value = "BirthDate";
-                    worksheet.Cells[1, 12].Value = "Wins Count";
-                    worksheet.Cells[1, 13].Value = "Total Wins Amount";
-                    worksheet.Cells[1, 14].Value = "Register Date";
+                    worksheet.Cells[1, 11].Value = "Win Date";
+                    worksheet.Cells[1, 12].Value = "BirthDate";
+                    worksheet.Cells[1, 13].Value = "Wins Count";
+                    worksheet.Cells[1, 14].Value = "Total Wins Amount";
+                    worksheet.Cells[1, 15].Value = "Register Date";
 
-                    for (int column = 1; column <= 13; column++)
+                    for (int column = 1; column <= 15; column++)
                     {
                         using (var range = worksheet.Cells[1, column, worksheet.Dimension.End.Row, column])
                         {
@@ -310,10 +312,11 @@ namespace UltimatePlaylist.Services.Games.Jobs
                         worksheet.Cells[i + 2, 8].Value = data.PhoneNumber;
                         worksheet.Cells[i + 2, 9].Value = data.Gender;
                         worksheet.Cells[i + 2, 10].Value = data.GameId;
-                        worksheet.Cells[i + 2, 11].Value = DateTime.Parse(data.BirthDate.ToString()).ToString("yyyy-MM-dd");
-                        worksheet.Cells[i + 2, 12].Value = data.WinsCount;
-                        worksheet.Cells[i + 2, 13].Value = data.TotalWinsAmount;
-                        worksheet.Cells[i + 2, 14].Value = DateTime.Parse(data.RegisterDate.ToString()).ToString("yyyy-MM-dd");
+                        worksheet.Cells[i + 2, 11].Value = endDay.ToString("yyyy-MM-dd");
+                        worksheet.Cells[i + 2, 12].Value = DateTime.Parse(data.BirthDate.ToString()).ToString("yyyy-MM-dd");
+                        worksheet.Cells[i + 2, 13].Value = data.WinsCount;
+                        worksheet.Cells[i + 2, 14].Value = data.TotalWinsAmount;
+                        worksheet.Cells[i + 2, 15].Value = DateTime.Parse(data.RegisterDate.ToString()).ToString("yyyy-MM-dd");
                         worksheet.Cells.AutoFitColumns();
                         worksheet.Cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                     }
