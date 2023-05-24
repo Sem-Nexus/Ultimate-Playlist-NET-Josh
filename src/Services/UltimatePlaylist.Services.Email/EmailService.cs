@@ -45,12 +45,12 @@ namespace UltimatePlaylist.Services.Email
         public async Task SendEmailWithExcelAttachment(string toEmail, string subject, string file)
         {
 
-            DateTime endDay = DateTime.Now.AddDays(-1);           
+            DateTime today = DateTime.Now;           
             var message = new SendGridMessage
             {                
                 Subject = subject,
                 From = new EmailAddress(config.SenderEmail),
-                HtmlContent = "<p><b>Winners List Date: " + endDay.ToString("MM-dd-yyyy") + "</b></p>"
+                HtmlContent = "<p><b>Winners List Date: " + today.ToString("MM-dd-yyyy") + "</b></p>"
             };
 
            //To do add array of emails from config file
@@ -60,7 +60,7 @@ namespace UltimatePlaylist.Services.Email
             message.AddTo(new EmailAddress("up@azlottery.gov"));
             message.AddTo(new EmailAddress("dandrego@azlottery.gov"));
 
-            message.AddAttachment(endDay.ToString("MM-dd-yyyy") +".xlsx", file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            message.AddAttachment(today.ToString("MM-dd-yyyy") +".xlsx", file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
             var response = await client.SendEmailAsync(message);
             if (response.StatusCode != HttpStatusCode.Accepted)
