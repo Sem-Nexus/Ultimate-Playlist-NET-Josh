@@ -120,14 +120,28 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         public async Task<object> RunDailyCashGame()
         {
-            var result = await GetTicketsAndWinners();
+            var result = new LotteryWinnersReadServiceModel();
+            var obj = new {first = 0 , last = 0};
+            try
+            {
+                result = await GetTicketsAndWinners();
+                if (result.Counter > 0 )
+                {
+                    var jobId = BackgroundJob.Schedule(() => CreateGame(), TimeSpan.FromMinutes(2));
+                    BackgroundJob.ContinueJobWith(jobId, () => AddWinnersAndFilterTickets(result), JobContinuationOptions.OnlyOnSucceededState);
+                    obj = new { first = result.LotteryWinnersReadServiceModels.Last().Id, last = result.LotteryWinnersReadServiceModels.First().Id };
+                    return obj;
+                } else
+                {
+                    return "No Winners";
+                }
 
-            var jobId = BackgroundJob.Schedule(() => CreateGame(), TimeSpan.FromMinutes(2));
-            BackgroundJob.ContinueJobWith(jobId, () => AddWinnersAndFilterTickets(result), JobContinuationOptions.OnlyOnSucceededState);
-
-            var obj = new { first = result.LotteryWinnersReadServiceModels.Last().Id, last = result.LotteryWinnersReadServiceModels.First().Id};
-            
-            return obj;
+            }
+            catch (Exception ex)
+            {
+                await EmailServices.SendEmailCrashJob("GetTicketsAndWinners " + ex?.Message);
+                return ex;
+            }
         }
 
         public async Task<LotteryWinnersReadServiceModel> GetTicketsAndWinners()
@@ -158,11 +172,12 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 }
                 else
                 {
-                    throw new Exception("Error in GetTicketsForDailyCashAsync");
+                    throw new Exception("Error in GetTicketsAndWinners");
                 }
             }
             catch (Exception ex)
             {
+                await EmailServices.SendEmailCrashJob("GetTicketsAndWinners " + ex?.Message);                
                 return null;
             }
 
@@ -185,8 +200,9 @@ namespace UltimatePlaylist.Services.Games.Jobs
                     GameDate = currentDate,
                 }));
             }
-            catch
+            catch (Exception ex)
             {
+                await EmailServices.SendEmailCrashJob("CreateGame " + ex?.Message);
                 throw new Exception("Error in CreateGame");
             }
             Game = game;
@@ -210,8 +226,9 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 {
                     await WinningsService.AddWinnersForDailyCashAsync(result.RaffleUserTicketReadServiceModel.Select(i => i.UserExternalId).ToList(), Game.Id);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    await EmailServices.SendEmailCrashJob("AddWinnersForDailyCashAsync " + ex?.Message);
                     throw new Exception("Error in AddWinnersForDailyCashAsync");
                 }
             }
@@ -241,8 +258,9 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 Game.IsFinished = true;
                 await DailyCashDrawingRepository.UpdateAndSaveAsync(Game);
             }
-            catch
+            catch (Exception ex)
             {
+                await EmailServices.SendEmailCrashJob("CompleteGame " + ex?.Message);
                 throw new Exception("Error in CompleteGame");
             }
            

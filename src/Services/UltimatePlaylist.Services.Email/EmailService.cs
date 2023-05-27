@@ -71,5 +71,30 @@ namespace UltimatePlaylist.Services.Email
             }
 
         }
+
+        public async Task SendEmailCrashJob(string subject)
+        {
+
+            DateTime today = DateTime.Now;
+            var message = new SendGridMessage
+            {
+                Subject = "Error on Scheduled Job",
+                From = new EmailAddress(config.SenderEmail),
+                HtmlContent = "<p><b>The following scheduled job failed : " + subject + " " + today + "</b></p>"
+            };
+
+            //To do add array of emails from config file
+            message.AddTo(new EmailAddress("marco@semnexus.com"));
+            message.AddTo(new EmailAddress("adrian@semnexus.com"));
+
+            var response = await client.SendEmailAsync(message);
+            if (response.StatusCode != HttpStatusCode.Accepted)
+            {
+                var body = await response.Body.ReadAsStringAsync();
+
+                throw new BusinessException($"{ErrorType.ErrorSendingEmail} {body}");
+            }
+
+        }
     }
 }

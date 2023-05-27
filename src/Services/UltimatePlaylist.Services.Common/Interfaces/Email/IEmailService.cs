@@ -12,5 +12,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces
         Task SendEmailAsync(EmailRequest email);
 
         Task SendEmailWithExcelAttachment(string toEmail, string subject, string file);
+
+        Task SendEmailCrashJob(string toEmail);        
     }
 }
