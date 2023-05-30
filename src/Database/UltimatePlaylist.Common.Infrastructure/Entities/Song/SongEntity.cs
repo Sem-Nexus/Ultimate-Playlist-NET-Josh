@@ -44,25 +44,25 @@ namespace UltimatePlaylist.Database.Infrastructure.Entities.Song
 
         public string Producer { get; set; }
 
-        public DateTime FirstReleaseDate { get; set; }
+        public DateTime? FirstReleaseDate { get; set; }
 
-        public bool IsNewRelease { get; set; }
+        public bool? IsNewRelease { get; set; }
 
         public long AudioFileId { get; set; }
 
         public long CoverFileId { get; set; }
 
-        public bool IsAudioOriginal { get; set; }
+        public bool? IsAudioOriginal { get; set; }
 
-        public bool IsArtWorkOriginal { get; set; }
+        public bool? IsArtWorkOriginal { get; set; }
 
-        public bool HasExplicitContent { get; set; }
+        public bool? HasExplicitContent { get; set; }
 
-        public bool HasSample { get; set; }
+        public bool? HasSample { get; set; }
 
         public bool? HasLegalClearance { get; set; }
 
-        public bool IsConfirmed { get; set; }
+        public bool? IsConfirmed { get; set; }
 
         public TimeSpan Duration { get; set; }
 

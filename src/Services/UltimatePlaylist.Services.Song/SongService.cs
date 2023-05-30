@@ -108,6 +108,8 @@ namespace UltimatePlaylist.Services.Song
 
         public async Task<Result> AddSongAsync(AddSongWriteServiceModel addSongWriteServiceModel)
         {
+
+            if (addSongWriteServiceModel.FirstPublicReleaseDate == null) { addSongWriteServiceModel.FirstPublicReleaseDate = DateTime.Now;}
             var entityToSave = Mapper.Map<SongEntity>(addSongWriteServiceModel);
 
             return await GetSongCoverFile(addSongWriteServiceModel.SongCoverExternalId)
@@ -147,7 +149,16 @@ namespace UltimatePlaylist.Services.Song
 
         private async Task<Result<SongEntity>> AddSongToDatabase(SongEntity songEntity)
         {
-            var added = await SongRepository.AddAsync(songEntity);
+            SongEntity added = default;
+
+            try
+            {
+                added = await SongRepository.AddAsync(songEntity);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
 
             return Result.SuccessIf(added != null, added, ErrorType.CannotAddSongToDatabase.ToString());
         }
@@ -248,10 +259,10 @@ namespace UltimatePlaylist.Services.Song
         {
             var songDSPLinks = new List<SongDSPEntity>();
 
-            songDSPLinks.Add(GenerateSongDSPEntity(song, addSongWriteServiceModel.LinkToSpotify, DspType.Spotify));
-            if (!String.IsNullOrEmpty(addSongWriteServiceModel.LinkToAppleMusic))
-            {
             songDSPLinks.Add(GenerateSongDSPEntity(song, addSongWriteServiceModel.LinkToAppleMusic, DspType.AppleMusic));
+            if (!String.IsNullOrEmpty(addSongWriteServiceModel.LinkToSpotify))
+            {
+                songDSPLinks.Add(GenerateSongDSPEntity(song, addSongWriteServiceModel.LinkToSpotify, DspType.Spotify));
             }
             
 
