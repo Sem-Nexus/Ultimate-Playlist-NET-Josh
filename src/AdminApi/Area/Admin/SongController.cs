@@ -90,6 +90,15 @@ namespace UltimatePlaylist.AdminApi.Area.Admin
                .Finally(BuildEnvelopeResult);
         }
 
+        [HttpGet("social-dps")]
+        [ProducesEnvelope(typeof(SongDSPEntity), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSongDPS([FromQuery] string songId)
+        {
+            return await SongStatisticsService.GetSongDPS(songId)
+               .Map(songs => Mapper.Map<List<SongDSPEntity>>(songs))
+               .Finally(BuildEnvelopeResult);
+        }
+
         #endregion
 
         #region POST

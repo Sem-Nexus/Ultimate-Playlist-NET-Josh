@@ -130,5 +130,19 @@ namespace UltimatePlaylist.Services.Song
 
         }
 
+        public async Task<Result<List<SongDSPEntity>>> GetSongDPS(string songId)
+        {
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[GetSongDataDPS]");
+            builder.Append($"@SongId = '{songId}'");
+
+            var result = await Context
+                .SongDPS
+                .FromSqlRaw(builder.ToString()).ToListAsync();
+
+            return Result.Success(result);
+
+        }
+
     }
 }

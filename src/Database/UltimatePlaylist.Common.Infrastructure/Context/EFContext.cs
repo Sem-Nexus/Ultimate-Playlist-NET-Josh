@@ -73,7 +73,9 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
 
         public DbSet<WinnersInformationEntity> GetWinnersInformation { get; set; }
 
-        public DbSet<SongSocialMediaEntity> SongSocialMedia { get; set; }        
+        public DbSet<SongSocialMediaEntity> SongSocialMedia { get; set; }
+
+        public DbSet<SongDSPEntity> SongDPS { get; set; }
 
         #endregion
 

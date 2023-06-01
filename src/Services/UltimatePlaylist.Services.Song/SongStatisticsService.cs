@@ -85,6 +85,12 @@ namespace UltimatePlaylist.Services.Song
                    .Map(songs => Mapper.Map<IReadOnlyList<SongSocialMediaEntity>> (songs));
         }
 
+        public async Task<Result<IReadOnlyList<SongDSPEntity>>> GetSongDPS(string songId)
+        {
+            return await SongStatisticsProcedureRepository.GetSongDPS(songId)
+                   .Map(songs => Mapper.Map<IReadOnlyList<SongDSPEntity>>(songs));
+        }
+
         #endregion
     }
 }

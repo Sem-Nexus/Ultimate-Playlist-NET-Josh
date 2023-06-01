@@ -19,5 +19,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Song
         Task<Result<SongEntity>> GetSongData(string externalID);
 
         Task<Result<IReadOnlyList<SongSocialMediaEntity>>> GetSongSocialMedia(string songId);
+
+        Task<Result<IReadOnlyList<SongDSPEntity>>> GetSongDPS(string songId);
     }
 }
