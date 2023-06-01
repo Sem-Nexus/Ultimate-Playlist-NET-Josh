@@ -72,7 +72,9 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
         public DbSet<TicketEntity> GetDailyTickets { get; set; }
 
         public DbSet<WinnersInformationEntity> GetWinnersInformation { get; set; }
-        
+
+        public DbSet<SongSocialMediaEntity> SongSocialMedia { get; set; }        
+
         #endregion
 
         #region Builder
@@ -86,7 +88,7 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
             builder.Entity<LeaderboardRankingBySongCountView>(eb => eb.ToView("LeaderboardSongCountRanking"));
             builder.Entity<SongPopularityView>(eb => eb.ToView("SongPopularity"));
             builder.Entity<WinnersInformationEntity>(eb => eb.ToView("DailyCashWinners"));
-        }
+    }
 
         #endregion
     }

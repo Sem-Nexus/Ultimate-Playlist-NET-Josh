@@ -7,6 +7,7 @@ using CSharpFunctionalExtensions;
 using OfficeOpenXml;
 using UltimatePlaylist.Common.Models;
 using UltimatePlaylist.Common.Mvc.Attributes;
+using UltimatePlaylist.Database.Infrastructure.Entities.Song;
 using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Interfaces.Song;
 using UltimatePlaylist.Services.Common.Models;
@@ -70,6 +71,18 @@ namespace UltimatePlaylist.Services.Song
         {
             return await SongStatisticsProcedureRepository.GetFileSongsData(pagination, filterServiceModel)
                    .Map(songs => Mapper.Map<IReadOnlyList<SongsAnalyticsFileServiceReadModel>>(songs));
+        }
+
+        public async Task<Result<SongEntity>> GetSongData(string externalID)
+        {
+            return await SongStatisticsProcedureRepository.GetSongData(externalID)
+                   .Map(songs => Mapper.Map<SongEntity>(songs));
+        }
+
+        public async Task<Result<IReadOnlyList<SongSocialMediaEntity>>> GetSongSocialMedia(string songId)
+        {
+            return await SongStatisticsProcedureRepository.GetSongSocialMedia(songId)
+                   .Map(songs => Mapper.Map<IReadOnlyList<SongSocialMediaEntity>> (songs));
         }
 
         #endregion

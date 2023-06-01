@@ -5,6 +5,7 @@ using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;
 using UltimatePlaylist.Common.Models;
 using UltimatePlaylist.Database.Infrastructure.Context;
+using UltimatePlaylist.Database.Infrastructure.Entities.Song;
 using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Interfaces.Song;
 using UltimatePlaylist.Services.Common.Models.Song;
@@ -100,5 +101,34 @@ namespace UltimatePlaylist.Services.Song
         {
             return date.ToString("yyyy'-'MM'-'dd");
         }
+
+        public async Task<Result<SongEntity>> GetSongData(string externalID)
+        {
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[GetSongData]");
+            builder.Append($"@ExternalId = '{externalID}'");
+
+            var result = await Context
+                .Songs
+                .FromSqlRaw(builder.ToString()).ToListAsync();
+
+            return Result.Success(result.FirstOrDefault());
+
+        }
+
+        public async Task<Result<List<SongSocialMediaEntity>>> GetSongSocialMedia(string songId)
+        {
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[GetSongDataDetails]");
+            builder.Append($"@SongId = '{songId}'");
+
+            var result = await Context
+                .SongSocialMedia
+                .FromSqlRaw(builder.ToString()).ToListAsync();
+
+            return Result.Success(result);
+
+        }
+
     }
 }

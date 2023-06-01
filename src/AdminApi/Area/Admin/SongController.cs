@@ -15,6 +15,7 @@ using UltimatePlaylist.Common.Mvc.Paging;
 using UltimatePlaylist.Services.Common.Interfaces.Song;
 using UltimatePlaylist.Services.Common.Models.Song;
 using static UltimatePlaylist.Common.Mvc.Consts.Consts;
+using UltimatePlaylist.Database.Infrastructure.Entities.Song;
 
 #endregion
 
@@ -68,6 +69,24 @@ namespace UltimatePlaylist.AdminApi.Area.Admin
         {
             return await SongStatisticsService.SongsListAsync(XPagination, new SongsAnalyticsFilterServiceModel())
                .Map(songs => Mapper.Map<PaginatedResponse<SongResponseModel>>(songs))
+               .Finally(BuildEnvelopeResult);
+        }
+
+        [HttpGet("")]
+        [ProducesEnvelope(typeof(SongEntity), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSong([FromQuery] string externalId)
+        {
+            return await SongStatisticsService.GetSongData(externalId)
+               .Map(songs => Mapper.Map<SongEntity>(songs))
+               .Finally(BuildEnvelopeResult);
+        }
+
+        [HttpGet("social-media")]
+        [ProducesEnvelope(typeof(SongSocialMediaEntity), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSongSocialMedia([FromQuery] string songId)
+        {
+            return await SongStatisticsService.GetSongSocialMedia(songId)
+               .Map(songs => Mapper.Map<List<SongSocialMediaEntity>>(songs))
                .Finally(BuildEnvelopeResult);
         }
 
