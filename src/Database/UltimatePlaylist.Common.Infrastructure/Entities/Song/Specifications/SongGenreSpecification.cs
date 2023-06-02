@@ -2,18 +2,22 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using UltimatePlaylist.Common.Enums;
 using UltimatePlaylist.Database.Infrastructure.Entities.Song;
+using UltimatePlaylist.Database.Infrastructure.Entities.Song.Specifications;
+using UltimatePlaylist.Database.Infrastructure.Entities.Ticket.Specifications;
 using UltimatePlaylist.Database.Infrastructure.Specifications;
 
 #endregion
 
 namespace UltimatePlaylist.Database.Infrastructure.Entities.Specifications
 {
-    public class GenreSpecification : BaseSpecification<GenreEntity>
+    public class SongGenreSpecification : BaseSpecification<SongGenreEntity>
     {
         #region Constructor(s)
 
-        public GenreSpecification(bool includeDeleted = false)
+        public SongGenreSpecification(bool includeDeleted = false)
         {
             if (!includeDeleted)
             {
@@ -25,19 +29,20 @@ namespace UltimatePlaylist.Database.Infrastructure.Entities.Specifications
 
         #region Filters
 
-        public GenreSpecification ByExternalIds(IList<Guid> externalIds)
+        public SongGenreSpecification BySongId(long songId)
         {
-            AddCriteria(c => externalIds.Contains(c.ExternalId));
+            AddCriteria(c => c.SongId == songId);
 
             return this;
         }
 
-        public GenreSpecification BySongId(long songId)
+        public SongGenreSpecification ByType(SongGenreType type)            
         {
-            AddCriteria(c => c.SongGenres.Any(p => p.SongId == songId));
+            AddCriteria(c => c.Type == type);
 
             return this;
         }
+
 
         #endregion
 

@@ -15,6 +15,8 @@ namespace UltimatePlaylist.AdminApi.Models.Song
 
         public string Artist { get; set; }
 
+        public string OwnerLabel { get; set; }
+
         public string Title { get; set; }
 
         public string Album { get; set; }

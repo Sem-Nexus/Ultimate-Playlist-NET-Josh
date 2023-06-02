@@ -3,6 +3,7 @@
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using UltimatePlaylist.Common.Models;
+using UltimatePlaylist.Database.Infrastructure.Entities.Song;
 using UltimatePlaylist.Services.Common.Models;
 using UltimatePlaylist.Services.Common.Models.Song;
 
@@ -18,5 +19,8 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Song
 
         Task<Result<PaginatedReadServiceModel<SongReadServiceModel>>> SongsListAsync(
             Pagination pagination);
+
+       Task<Result<SongEntity>> EditSongAsync(AddSongWriteServiceModel addSongWriteServiceModel);
+
     }
 }

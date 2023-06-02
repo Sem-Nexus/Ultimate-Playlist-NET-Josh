@@ -16,6 +16,8 @@
 
         public string Genre { get; set; }
 
+        public string GenreSecondary { get; set; }
+
         public int NumberOfTimesAddedToDSP { get; set; }
 
         public int NumbersOfRate { get; set; }

@@ -121,8 +121,8 @@ namespace UltimatePlaylist.Services.Song
                     .Check(async primaryGenres => await AddSongGenres(song, primaryGenres, SongGenreType.Primary)))
                 .CheckIf(addSongWriteServiceModel.SecondaryGenres.Count > 0, async song => await GetSongGenres(addSongWriteServiceModel.SecondaryGenres)
                     .Check(async secondaryGenres => await AddSongGenres(song, secondaryGenres, SongGenreType.Secondary)))
-                .Check(async song => await AddSongSocialMedia(song, addSongWriteServiceModel))
-                .Check(async song => await AddSongDSPLinks(song, addSongWriteServiceModel));
+                .Check(async song => await AddSongSocialMedia(song, addSongWriteServiceModel, false))
+                .Check(async song => await AddSongDSPLinks(song, addSongWriteServiceModel, false));
         }
 
         public async Task<Result> RemoveSongAsync(RemoveSongWriteServiceModel removeSongWriteServiceModel)
@@ -209,7 +209,8 @@ namespace UltimatePlaylist.Services.Song
 
         private async Task<Result> AddSongSocialMedia(
             SongEntity song,
-            AddSongWriteServiceModel addSongWriteServiceModel)
+            AddSongWriteServiceModel addSongWriteServiceModel,
+            bool editable)
         {
             var songSocialMedias = new List<SongSocialMediaEntity>();
 
@@ -218,8 +219,14 @@ namespace UltimatePlaylist.Services.Song
             CheckIfSocialMediaCanBeAdded(addSongWriteServiceModel.SnapchatUrl, song, SocialMediaType.Snapchat, songSocialMedias);
             CheckIfSocialMediaCanBeAdded(addSongWriteServiceModel.YoutubeUrl, song, SocialMediaType.Youtube, songSocialMedias);
 
-            if (songSocialMedias.Count > 0)
+            if (editable)
             {
+                await SongSocialMediaRepository.DeleteAsync((new SongSocialMediaSpecification()
+                  .BySongId(song.Id)));
+            }
+
+            if (songSocialMedias.Count > 0)
+            {              
                 var addedSonSocialMedias = await SongSocialMediaRepository.AddRangeAsync(songSocialMedias);
 
                 return Result.SuccessIf(addedSonSocialMedias.Count() > 0, ErrorType.CannotAddSongSocialMedia.ToString());
@@ -255,10 +262,16 @@ namespace UltimatePlaylist.Services.Song
 
         private async Task<Result> AddSongDSPLinks(
             SongEntity song,
-            AddSongWriteServiceModel addSongWriteServiceModel)
+            AddSongWriteServiceModel addSongWriteServiceModel,
+            bool editable)
         {
             var songDSPLinks = new List<SongDSPEntity>();
 
+            if (editable)
+            {
+                await SongDSPRepository.DeleteAsync((new SongDSPSpecification()
+                    .BySongId(song.Id)));
+            }
             songDSPLinks.Add(GenerateSongDSPEntity(song, addSongWriteServiceModel.LinkToAppleMusic, DspType.AppleMusic));
             if (!String.IsNullOrEmpty(addSongWriteServiceModel.LinkToSpotify))
             {
@@ -319,6 +332,85 @@ namespace UltimatePlaylist.Services.Song
             await PlaylistSongRepository.DeleteAsync(new PlaylistSongSpecification()
                 .BySongExternalId(sonExternalId)
                 .ByNewerThanTodayDate());
+        }
+
+        public async Task<Result<SongEntity>> EditSongAsync(AddSongWriteServiceModel addSongWriteServiceModel)
+        {
+            SongEntity editedSong = await SongRepository.FirstOrDefaultAsync(new SongSpecification()
+                  .ByExternalId(addSongWriteServiceModel.SongCoverExternalId));
+
+
+            editedSong.Artist = addSongWriteServiceModel.Artist;
+            editedSong.Title = addSongWriteServiceModel.Title;
+            editedSong.Album = addSongWriteServiceModel.Album;
+            editedSong.OwnerLabel = addSongWriteServiceModel.OwnerLabel;
+            editedSong.Licensor = addSongWriteServiceModel.Licensor;
+            editedSong.Songwriter = addSongWriteServiceModel.SongWriter;
+            editedSong.Producer = addSongWriteServiceModel.Producer;
+            editedSong.FeaturedArtist = addSongWriteServiceModel.FeaturedArtist;
+            editedSong.FirstReleaseDate = addSongWriteServiceModel.FirstPublicReleaseDate == null ? DateTime.Now : addSongWriteServiceModel.FirstPublicReleaseDate;
+            editedSong.IsNewRelease = addSongWriteServiceModel.IsNewRelease;
+            editedSong.IsArtWorkOriginal = addSongWriteServiceModel.IsAllArtworkOriginal;
+            editedSong.IsAudioOriginal = addSongWriteServiceModel.IsAllAudioOriginal;
+            editedSong.HasExplicitContent = addSongWriteServiceModel.IsSongWithExplicitContent;
+            editedSong.HasSample = addSongWriteServiceModel.IsSongWithSample;
+            editedSong.HasLegalClearance = addSongWriteServiceModel.IsLeagalClearanceObtained;
+            editedSong.IsConfirmed = addSongWriteServiceModel.IsAllConfirmed;
+
+            await SongGenreRepository.DeleteAsync((new SongGenreSpecification()
+                .BySongId(editedSong.Id))
+                .ByType(SongGenreType.Primary));
+
+
+            if (addSongWriteServiceModel.PrimaryGenres.Count > 0)
+            {
+                
+                var song = await GetSongGenres(addSongWriteServiceModel.PrimaryGenres);
+                var genreEntities = song.Value;
+                var songGenres = new List<SongGenreEntity>();
+
+                genreEntities.ForEach(s => songGenres.Add(new SongGenreEntity()
+                {
+                    Type = SongGenreType.Primary,
+                    Song = editedSong,
+                    SongId = editedSong.Id,
+                    GenreId = s.Id,
+                }));
+
+                await SongGenreRepository.AddRangeAsync(songGenres);
+
+            }
+
+            await SongGenreRepository.DeleteAsync((new SongGenreSpecification()
+                .BySongId(editedSong.Id))
+                .ByType(SongGenreType.Secondary));
+
+            if (addSongWriteServiceModel.SecondaryGenres.Count > 0)
+            {
+
+                var song = await GetSongGenres(addSongWriteServiceModel.SecondaryGenres);
+                var genreEntities = song.Value;
+                var songGenres = new List<SongGenreEntity>();
+
+                genreEntities.ForEach(s => songGenres.Add(new SongGenreEntity()
+                {
+                    Type = SongGenreType.Secondary,
+                    Song = editedSong,
+                    SongId = editedSong.Id,
+                    GenreId = s.Id,
+                }));
+
+                await SongGenreRepository.AddRangeAsync(songGenres);
+            }
+           
+
+            await AddSongSocialMedia(editedSong, addSongWriteServiceModel, true);
+
+            await AddSongDSPLinks(editedSong, addSongWriteServiceModel, true);
+
+            await SongRepository.UpdateAndSaveAsync(editedSong);
+
+            return Result.Success(editedSong);
         }
 
         #endregion

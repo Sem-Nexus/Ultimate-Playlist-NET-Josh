@@ -128,5 +128,19 @@ namespace UltimatePlaylist.AdminApi.Area.Admin
         }
 
         #endregion
+
+        #region PUT
+
+        [HttpPut("edit-song")]
+        [ProducesEmptyEnvelope(StatusCodes.Status200OK)]
+        public async Task<IActionResult> EditSongAsync([FromBody] AddSongRequestModel editSongRequestModel)
+        {
+            var mapped = Mapper.Map<AddSongWriteServiceModel>(editSongRequestModel);
+
+            return await SongService.EditSongAsync(mapped)
+               .Finally(BuildEnvelopeResult);
+        }
+            
+        #endregion
     }
 }

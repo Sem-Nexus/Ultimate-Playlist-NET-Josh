@@ -10,7 +10,6 @@ namespace UltimatePlaylist.Services.Common.Models.Song
     public class AddSongWriteServiceModel
     {
         public Guid SongFileExternalId { get; set; }
-
         public Guid SongCoverExternalId { get; set; }
 
         public string Artist { get; set; }
@@ -23,13 +22,15 @@ namespace UltimatePlaylist.Services.Common.Models.Song
 
         public string Label { get; set; }
 
+        public string OwnerLabel { get; set; }
+
         public string Licensor { get; set; }
 
         public string LinkToSpotify { get; set; }
 
-        public string? LinkToAppleMusic { get; set; }
+        public string LinkToAppleMusic { get; set; }
 
-        public bool IsNewRelease { get; set; }
+        public bool? IsNewRelease { get; set; }
 
         public DateTime? FirstPublicReleaseDate { get; set; }
 
@@ -49,18 +50,19 @@ namespace UltimatePlaylist.Services.Common.Models.Song
 
         public string SnapchatUrl { get; set; }
 
-        public bool IsAllAudioOriginal { get; set; }
+        public bool? IsAllAudioOriginal { get; set; }
 
-        public bool IsAllArtworkOriginal { get; set; }
+        public bool? IsAllArtworkOriginal { get; set; }
 
-        public bool IsSongWithExplicitContent { get; set; }
+        public bool? IsSongWithExplicitContent { get; set; }
 
-        public bool IsSongWithSample { get; set; }
+        public bool? IsSongWithSample { get; set; }
 
         public bool? IsLeagalClearanceObtained { get; set; }
 
-        public bool IsAllConfirmed { get; set; }
+        public bool? IsAllConfirmed { get; set; }
 
         public TimeSpan Duration { get; set; }
+
     }
 }

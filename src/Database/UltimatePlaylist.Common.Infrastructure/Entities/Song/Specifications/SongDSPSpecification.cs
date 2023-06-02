@@ -57,6 +57,13 @@ namespace UltimatePlaylist.Database.Infrastructure.Entities.Song.Specifications
             return this;
         }
 
+        public SongDSPSpecification BySongId(long songId)
+        {
+            AddCriteria(c => c.SongId == songId);
+
+            return this;
+
+        }
         #endregion
     }
 }
