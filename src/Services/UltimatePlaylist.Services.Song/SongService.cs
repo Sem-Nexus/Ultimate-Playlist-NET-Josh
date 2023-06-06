@@ -150,7 +150,13 @@ namespace UltimatePlaylist.Services.Song
         private async Task<Result<SongEntity>> AddSongToDatabase(SongEntity songEntity)
         {
             SongEntity added = default;
-
+            songEntity.FirstReleaseDate = songEntity.FirstReleaseDate == null ? DateTime.Now : songEntity.FirstReleaseDate;
+            songEntity.IsNewRelease = songEntity.IsNewRelease == null ? false : songEntity.IsNewRelease;
+            songEntity.IsAudioOriginal = songEntity.IsAudioOriginal == null ? false : songEntity.IsAudioOriginal;
+            songEntity.IsArtWorkOriginal = songEntity.IsArtWorkOriginal == null ? false : songEntity.IsArtWorkOriginal;
+            songEntity.HasExplicitContent = songEntity.HasExplicitContent == null ? false : songEntity.HasExplicitContent;
+            songEntity.HasSample = songEntity.HasSample == null ? false : songEntity.HasSample;
+            
             try
             {
                 added = await SongRepository.AddAsync(songEntity);
