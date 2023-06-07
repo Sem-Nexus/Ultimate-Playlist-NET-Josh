@@ -50,10 +50,13 @@ namespace UltimatePlaylist.Services.Email
             {                
                 Subject = subject,
                 From = new EmailAddress(config.SenderEmail),
-                HtmlContent = "<p><b>Winners List Date: " + today.ToString("MM-dd-yyyy") + "</b></p>"
+                HtmlContent = "<p><b>Winners List Date: " + today.ToString("MM-dd-yyyy") + "</b></p>" +
+               "<br> <br> " +
+               "<b> <p>Excel report has been updated with yesterday's users data</p></b>" +
+               "<b> <a href=\"https://docs.google.com/spreadsheets/d/1dwoCSB0to4erhI2xPfvNMns-7XDSRnSYs3AcMbWb00o/edit#gid=0\">User report</a></b>"
             };
 
-           //To do add array of emails from config file
+            //To do add array of emails from config file
             message.AddTo(new EmailAddress("marco@semnexus.com"));
             message.AddTo(new EmailAddress("adrian@semnexus.com"));
             message.AddTo(new EmailAddress("shevy@eliteshout.com"));

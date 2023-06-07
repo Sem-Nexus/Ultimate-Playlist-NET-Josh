@@ -358,7 +358,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
         public async Task<int> FillExcelUserReport()
         {
             int lastRow;            
-            string date = DateTime.Now.ToString("M/dd/yyyy");
+            string date = DateTime.Now.AddDays(-1).ToString("M/dd/yyyy");
             try
             {
 
@@ -381,21 +381,21 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 var values = response.Values;
 
                 lastRow = values?.Count ?? 0;
-                int getPreviousValues = GetPreviousValues(service, $"Sheet2!A{lastRow}:Z{lastRow}", spreadsheetId);
+                int getPreviousValues = GetPreviousValues(service, $"{sheetName}!A{lastRow}:Z{lastRow}", spreadsheetId);
                 lastRow++;
 
                 int newUsers = totalUsers.UserCount - getPreviousValues;
-                int percentage = totalUsers.ActiveUsers / totalUsers.UserCount;
+                var percentage = (totalUsers.ActiveUsers / totalUsers.UserCount) * 100;
                 var valueRange = new ValueRange
                 {
                     Values = new List<IList<object>>
                     {
-                        new List<object> { date, newUsers, totalUsers.ActiveUsers, totalUsers.UserCount, percentage }
+                        new List<object> { date, newUsers, totalUsers.ActiveUsers, totalUsers.UserCount}
                     }
                 };
 
                 var valueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
-                var updateRequest = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, $"Sheet2!A{lastRow}:Z{lastRow}");
+                var updateRequest = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, $"{sheetName}!A{lastRow}:Z{lastRow}");
                 updateRequest.ValueInputOption = valueInputOption;
                 
                 var updateResponse = updateRequest.Execute();
