@@ -79,6 +79,9 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
 
         public DbSet<UserCountView> SoungCount { get; set; }
 
+        public DbSet<DailyUsersView> DailyUsers { get; set; }
+
+
         #endregion
 
         #region Builder

@@ -84,5 +84,19 @@ namespace UltimatePlaylist.Services.Song
 
         }
 
+        public async Task<List<DailyUsersView>> GetDailyUsersAdded()
+        {
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[GetAllUsers]");
+
+            var data = await Context
+                .DailyUsers
+                .FromSqlRaw(builder.ToString())
+                .ToListAsync();
+
+            return data;
+
+        }
+
     }
 }

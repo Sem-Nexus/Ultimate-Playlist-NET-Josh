@@ -20,5 +20,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Ticket
 
         Task<UserCountView> GetTotalUsers();
 
+        Task<List<DailyUsersView>> GetDailyUsersAdded();
+
     }
 }

@@ -357,12 +357,13 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         public async Task<int> FillExcelUserReport()
         {
-            int lastRow;            
+            int lastRow = 0;            
             string date = DateTime.Now.AddDays(-1).ToString("M/dd/yyyy");
             try
             {
 
-                UserCountView totalUsers = await TicketProcedureRepository.GetTotalUsers();               
+                UserCountView totalUsers = await TicketProcedureRepository.GetTotalUsers();
+                List<DailyUsersView> dailyUsers = await TicketProcedureRepository.GetDailyUsersAdded();
                 var credential = GoogleCredential.FromFile((@"C:\home\site\wwwroot\ultimate-play-list-sn-b736279e45c3.json"));
 
                 var service = new SheetsService(new BaseClientService.Initializer
@@ -371,34 +372,8 @@ namespace UltimatePlaylist.Services.Games.Jobs
                     ApplicationName = "ultimate-play-list-sn"
                 });
 
-                string spreadsheetId = PlaylistConfig.ExcelSheetId;
-                var sheetName = "Sheet1";
-
-                var range = $"{sheetName}!A1:A";
-                var request = service.Spreadsheets.Values.Get(spreadsheetId, range);
-
-                var response = request.Execute();
-                var values = response.Values;
-
-                lastRow = values?.Count ?? 0;
-                int getPreviousValues = GetPreviousValues(service, $"{sheetName}!A{lastRow}:Z{lastRow}", spreadsheetId);
-                lastRow++;
-
-                int newUsers = totalUsers.UserCount - getPreviousValues;
-                var percentage = (totalUsers.ActiveUsers / totalUsers.UserCount) * 100;
-                var valueRange = new ValueRange
-                {
-                    Values = new List<IList<object>>
-                    {
-                        new List<object> { date, newUsers, totalUsers.ActiveUsers, totalUsers.UserCount}
-                    }
-                };
-
-                var valueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
-                var updateRequest = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, $"{sheetName}!A{lastRow}:Z{lastRow}");
-                updateRequest.ValueInputOption = valueInputOption;
-                
-                var updateResponse = updateRequest.Execute();
+                AddUserStatsRow(service, lastRow, totalUsers, date);
+                AddUsersRow(service, dailyUsers);
 
             }
             catch (Exception ex)
@@ -428,6 +403,84 @@ namespace UltimatePlaylist.Services.Games.Jobs
             }
 
             return newUsers;
+        }
+
+        public  int AddUserStatsRow (SheetsService service, int lastRow, UserCountView totalUsers, string date)
+        {
+            string spreadsheetId = PlaylistConfig.ExcelSheetId;
+            var sheetName = "User Stats";
+
+            var range = $"{sheetName}!A1:A";
+            var request = service.Spreadsheets.Values.Get(spreadsheetId, range);
+
+            var response = request.Execute();
+            var values = response.Values;
+
+            lastRow = values?.Count ?? 0;
+            int getPreviousValues = GetPreviousValues(service, $"{sheetName}!A{lastRow}:Z{lastRow}", spreadsheetId);
+            lastRow++;
+
+            int newUsers = totalUsers.UserCount - getPreviousValues;
+            var percentage = (totalUsers.ActiveUsers / totalUsers.UserCount) * 100;
+            var valueRange = new ValueRange
+            {
+                Values = new List<IList<object>>
+                {
+                        new List<object> { date, newUsers, totalUsers.ActiveUsers, totalUsers.UserCount}
+                    }
+            };
+
+            var valueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+            var updateRequest = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, $"{sheetName}!A{lastRow}:Z{lastRow}");
+            updateRequest.ValueInputOption = valueInputOption;
+
+            var updateResponse = updateRequest.Execute();
+
+            return lastRow;
+        }
+
+        public void AddUsersRow(SheetsService service, List<DailyUsersView> totalUsers)
+        {
+            string spreadsheetId = PlaylistConfig.ExcelSheetId;
+            var sheetName = "All Users";
+
+            var range = $"{sheetName}!A2";
+
+            var rows = new List<IList<object>>();
+            foreach (var user in totalUsers)
+            {                
+                var row = new List<object>
+                {
+                    user.Id,
+                    user.Email,
+                    user.UserName,
+                    user.Name,
+                    user.LastName,
+                    user.Name,
+                    user.PhoneNumber,
+                    user.ZipCode,
+                    user.EmailConfirmed,
+                    user.IsActive,
+                    user.IsDeleted,
+                    user.LastActive,
+                    user.Updated,
+                    user.Created
+                };
+
+                rows.Add(row);
+            }
+
+            var valueRange = new ValueRange
+            {
+                Values = rows
+            };
+
+            var valueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+            valueRange.Range = "All Users!A2";
+            var appendRequest = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, range);
+            appendRequest.ValueInputOption = valueInputOption;
+
+            var appendResponse = appendRequest.Execute();
         }
     }
 }
