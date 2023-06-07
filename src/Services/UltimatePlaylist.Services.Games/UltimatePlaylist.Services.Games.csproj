@@ -9,6 +9,7 @@
 	<ItemGroup>
 	  <PackageReference Include="AutoMapper" Version="12.0.0" />
 	  <PackageReference Include="CSharpFunctionalExtensions" Version="2.34.3" />
+	  <PackageReference Include="Google.Apis.Sheets.v4" Version="1.60.0.2979" />
 	</ItemGroup>
 	
 	<ItemGroup>

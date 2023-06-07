@@ -19,5 +19,7 @@ namespace UltimatePlaylist.Common.Config
         public int AntibotSongsCount { get; set; }
 
         public string TimeZone { get; set; }
+
+        public string ExcelSheetId { get; set; }
     }
 }

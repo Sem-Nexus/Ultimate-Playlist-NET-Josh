@@ -77,6 +77,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
 
         public DbSet<SongDSPEntity> SongDPS { get; set; }
 
+        public DbSet<UserCountView> SoungCount { get; set; }
+
         #endregion
 
         #region Builder
@@ -89,6 +91,7 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
             builder.Entity<LeaderboardRankingByTicketCountView>(eb => eb.ToView("LeaderboardTicketCountRanking"));
             builder.Entity<LeaderboardRankingBySongCountView>(eb => eb.ToView("LeaderboardSongCountRanking"));
             builder.Entity<SongPopularityView>(eb => eb.ToView("SongPopularity"));
+            builder.Entity<UserCountView>().HasNoKey();
             builder.Entity<WinnersInformationEntity>(eb => eb.ToView("DailyCashWinners"));
     }
 

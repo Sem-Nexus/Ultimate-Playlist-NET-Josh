@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using UltimatePlaylist.Database.Infrastructure.Context;
 using UltimatePlaylist.Database.Infrastructure.Entities.Ticket;
+using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Interfaces.Ticket;
 using UltimatePlaylist.Services.Common.Models.Games;
 
@@ -68,5 +69,20 @@ namespace UltimatePlaylist.Services.Song
 
             return data.OrderByDescending(item => item.PrizeTier).ToList();
         }
+
+        public async Task<UserCountView> GetTotalUsers()
+        {
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[GetTotalUsers]");
+
+            var data = await Context
+                .SoungCount
+                .FromSqlRaw(builder.ToString())
+                .ToListAsync();
+
+            return data?.FirstOrDefault();
+
+        }
+
     }
 }

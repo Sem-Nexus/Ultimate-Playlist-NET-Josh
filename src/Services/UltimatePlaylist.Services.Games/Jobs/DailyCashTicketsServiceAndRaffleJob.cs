@@ -37,7 +37,11 @@ using UltimatePlaylist.Services.Common.Models.Email;
 using UltimatePlaylist.Services.Common.Interfaces;
 using OfficeOpenXml.Style;
 using DocumentFormat.OpenXml.Spreadsheet;
-
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Services;
+using Google.Apis.Sheets.v4;
+using Google.Apis.Sheets.v4.Data;
+using UltimatePlaylist.Database.Infrastructure.Views;
 
 #endregion
 
@@ -342,12 +346,88 @@ namespace UltimatePlaylist.Services.Games.Jobs
                     byte[] excelBytes = package.GetAsByteArray();
                     var excelBase64 = Convert.ToBase64String(excelBytes);
 
+                    await FillExcelUserReport();
                     await EmailServices.SendEmailWithExcelAttachment("", "Winners Results", excelBase64);
                 }
 
             }
 
             return winners;
+        }
+
+        public async Task<int> FillExcelUserReport()
+        {
+            int lastRow;            
+            string date = DateTime.Now.ToString("M/dd/yyyy");
+            try
+            {
+
+                UserCountView totalUsers = await TicketProcedureRepository.GetTotalUsers();               
+                var credential = GoogleCredential.FromFile((@"C:\home\site\wwwroot\ultimate-play-list-sn-b736279e45c3.json"));
+
+                var service = new SheetsService(new BaseClientService.Initializer
+                {
+                    HttpClientInitializer = credential,
+                    ApplicationName = "ultimate-play-list-sn"
+                });
+
+                string spreadsheetId = PlaylistConfig.ExcelSheetId;
+                var sheetName = "Sheet1";
+
+                var range = $"{sheetName}!A1:A";
+                var request = service.Spreadsheets.Values.Get(spreadsheetId, range);
+
+                var response = request.Execute();
+                var values = response.Values;
+
+                lastRow = values?.Count ?? 0;
+                int getPreviousValues = GetPreviousValues(service, $"Sheet2!A{lastRow}:Z{lastRow}", spreadsheetId);
+                lastRow++;
+
+                int newUsers = totalUsers.UserCount - getPreviousValues;
+                int percentage = totalUsers.ActiveUsers / totalUsers.UserCount;
+                var valueRange = new ValueRange
+                {
+                    Values = new List<IList<object>>
+                    {
+                        new List<object> { date, newUsers, totalUsers.ActiveUsers, totalUsers.UserCount, percentage }
+                    }
+                };
+
+                var valueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+                var updateRequest = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, $"Sheet2!A{lastRow}:Z{lastRow}");
+                updateRequest.ValueInputOption = valueInputOption;
+                
+                var updateResponse = updateRequest.Execute();
+
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message.ToString());
+            }
+
+            return lastRow;
+        }
+
+        public int GetPreviousValues(SheetsService service, string range, string spreadsheetId)
+        {
+            SpreadsheetsResource.ValuesResource.GetRequest request =
+            service.Spreadsheets.Values.Get(spreadsheetId, range);
+            ValueRange response = request.Execute();
+            int newUsers = 0;
+            
+            IList<IList<object>> values = response.Values;
+
+            if (values != null && values.Count > 0)
+            {
+                foreach (var row in values)
+                {
+                    newUsers = Int32.Parse(row[3].ToString());
+                }
+            }
+
+            return newUsers;
         }
     }
 }

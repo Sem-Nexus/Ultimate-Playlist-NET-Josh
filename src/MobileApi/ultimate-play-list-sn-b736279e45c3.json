@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "ultimate-play-list-sn",
+  "private_key_id": "b736279e45c33bcb45adc2c8a3c0bbcc576de32e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDVkfDVWGkLgcln\nlAyA/SLgTfQ37qamc86kCUZ+R/iFhVN6YCCiaIPqfQhhCEr7ylXe+/wBIx3Iknvd\nko+AyEjQg9CT5vrmZkz13Ym3l1cpfqhqaMWieRMBt/SRQkvFR+oqpTYhX3SovXWg\n2ze1umn8AaKAoYMz14/VFaJz/YcPrvssICHLkEVR6iykpu05gvRULKOEy4w/S1Ap\nxmllZghXzFVl8J3JRqRAIU5O8feaJ97BWSJyV/VSslqymmzy4YqUoKn9hzbySnbM\nFqL+oIIeUNpXa7PmMXZmHgBNAEJeHHIp6pZjpKK4to0lXW0lsBsH/pAul9i53HuK\nuqQ1D3ODAgMBAAECggEADtZRvfCjc5ozrM97QubTKnQf+FbLGxtGitzeGd3UJSqL\nDyBog//w0jSXhW43D2ESMCifbFDNO+b5Vf5dm9vOOzY9IllUqvcGd7pJXAjWlFpp\nRuM6f7wblu35vrG1Y+JIIWhS52SjTSnEZ0VzjFuEC27tpDQUUmCybGJRY++EF5G2\n6pbQl8dXIov29p4M4QtQjAKb38I5PXRtVJ1j6uHFFO/XPw6gstioIYOlB751kNcH\nzzjf6OLW/qNum3K3cb+AEVvyuJu+3emwdMfdg1/CWWqShi+Z/P6YDBcSCWC30Drl\ngpa1hSijj8I4Dz5HY8XcJfugjtE2C5zRMy55WKJK8QKBgQD8H8PJztptfTAoxiGJ\noSA4RdsLM2muAcGy4YzWBBdXvb2p/PmdGEzED+ftw3gxzNbYQK3iQOZhiknlc2HM\nC3DhJnap70ZOBuUy8J527fj44+epFJ3I6act+q2ZQQ05mjb5m+IU1sPGmDmXoy6r\n/8RUupY1E7UuC09Cq9nAH392GQKBgQDY2nJRbnXrERvDvPP1f4XJa2vb/n+rF5pw\nL50Cv/RV7LcAfJhUqtPPwrULkIIwcnoXMA7DuIOh+zaD0P+tTdT7Bes/Krv2mg9/\np/KeBeZbVlwmtDTb8MGNJXyKVPIC66o4/cysvWSdWwhMhXshhIlTfxGC8dpaWAbL\ndB9UQBcR+wKBgQCWbmGEhN6BG4PjoCwckT3HNa73ZOq2PygSkk9U1sYSvQxwY5eP\n6xLKnO72R33swNqj1xuo9q4/HqLuu8RrWZw1Spzc0f5xyd1xYm46acz2vAzaLoni\neb8dSQfRfCXm66PHlQH1Cxtu4B7k4iGT0JyVLWs4KhUdbvQQxLa80k5b6QKBgBU9\nWCMXsZ8DfveuAysRgXYX+mmCxNhqKGtCjptdV74uwEHg8j6guLxJstfeIJJENCcf\nQuLyqJnt9An3J4O+8tRfYQo/0kc2EbyMI5xMsaJSlBYKYn8EVsDPYiJebZHRqUuJ\nuElXB4rOBsMP8951j8nI0VtE+wEMTCYTSppC6L+PAoGBALAIakJf6XhYl/fRuS/v\nqoa0kt75/PffSvAAlkdZLjrGNbyBSwjWdy7wp9eKESAC7FsovYonU9pVAe4I2gQs\ndblWLVD547OkU6kr6BZWJpbRUIsdeGZkORjNNjrhx91KCFNXusc+MftYR5lLD936\n1BKpIuHaKwR9shRz30NTkbI8\n-----END PRIVATE KEY-----\n",
+  "client_email": "googlesheet@ultimate-play-list-sn.iam.gserviceaccount.com",
+  "client_id": "105985451925229357750",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/googlesheet%40ultimate-play-list-sn.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
