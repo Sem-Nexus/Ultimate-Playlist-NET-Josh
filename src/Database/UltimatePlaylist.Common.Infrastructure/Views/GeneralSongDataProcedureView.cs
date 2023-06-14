@@ -26,7 +26,7 @@
 
         public int UniquePlays { get; set; }
 
-        public long? TotalTimeListened { get; set; }
+        public int? TotalTimeListened { get; set; }
 
         public string CoverUrl { get; set; }
     }

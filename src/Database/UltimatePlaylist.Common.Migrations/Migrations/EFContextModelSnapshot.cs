@@ -1196,8 +1196,8 @@ namespace UltimatePlaylist.Database.Migrations.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<TimeSpan?>("TotalTimeListened")
-                        .HasColumnType("time");
+                    b.Property<int?>("TotalTimeListened")
+                        .HasColumnType("int");
 
                     b.Property<int>("UniquePlays")
                         .HasColumnType("int");
@@ -1287,8 +1287,8 @@ namespace UltimatePlaylist.Database.Migrations.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<TimeSpan?>("TotalTimeListened")
-                        .HasColumnType("time");
+                    b.Property<int?>("TotalTimeListened")
+                        .HasColumnType("int");
 
                     b.Property<int>("UniquePlays")
                         .HasColumnType("int");

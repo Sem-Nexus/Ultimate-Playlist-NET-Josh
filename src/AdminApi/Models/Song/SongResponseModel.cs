@@ -23,5 +23,7 @@ namespace UltimatePlaylist.AdminApi.Models.Song
         public int TotalAddedToDSP { get; set; }
 
         public string CoverUrl { get; set; }
+
+        public int TotalTimeListened { get; set; }
     }
 }

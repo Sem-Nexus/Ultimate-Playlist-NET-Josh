@@ -38,7 +38,7 @@ namespace UltimatePlaylist.AdminApi.Models.Song
         public int UniquePlays { get; set; }
 
         [UltimateColumn("Minutes listened")]
-        public TimeSpan TotalTimeListened { get; set; }
+        public long? TotalTimeListened { get; set; }
 
         [UltimateColumn(nameof(OwnerLabel))]
         public string OwnerLabel { get; set; }

@@ -462,9 +462,9 @@ namespace UltimatePlaylist.Services.Games.Jobs
                     user.EmailConfirmed,
                     user.IsActive,
                     user.IsDeleted,
-                    user.LastActive,
-                    user.Updated,
-                    user.Created
+                    user.LastActive.ToString() == null ? "" : DateTime.Parse(user.LastActive.ToString()).ToString("yyyy-MM-dd HH:mm:ss"),
+                    user.Updated.ToString() == null ? "" : DateTime.Parse(user.Updated.ToString()).ToString("yyyy-MM-dd HH:mm:ss"),
+                    user.Created.ToString() == null ? "" : DateTime.Parse(user.Created.ToString()).ToString("yyyy-MM-dd HH:mm:ss")
                 };
 
                 rows.Add(row);
