@@ -17,6 +17,7 @@ using UltimatePlaylist.Services.Common.Models.Song;
 using static UltimatePlaylist.Common.Mvc.Consts.Consts;
 using UltimatePlaylist.Database.Infrastructure.Entities.Song;
 using UltimatePlaylist.Services.Common.Interfaces.AppleMusic.Client;
+using UltimatePlaylist.Services.Common.Models.AppleMusic.Responses;
 
 #endregion
 
@@ -152,9 +153,9 @@ namespace UltimatePlaylist.AdminApi.Area.Admin
         [ProducesEmptyEnvelope(StatusCodes.Status200OK)]
         public async Task<IActionResult> SearchSongAppleMusicAsync([FromQuery] string searchParam)
         {
-
             return await AppleMusicPlaylistService.GetAllSongs(XUserExternalId, searchParam)
-               .Finally(BuildEnvelopeResult);
+                .Map(usersList => Mapper.Map<List<AppleSongResponse>>(usersList.results.songs.data))
+                .Finally(BuildEnvelopeResult);
         }
 
         [HttpGet("search-byID-apple-music")]
@@ -162,7 +163,8 @@ namespace UltimatePlaylist.AdminApi.Area.Admin
         public async Task<IActionResult> GetSongByID([FromQuery] string songID)
         {
             return await AppleMusicPlaylistService.GetSongByID(XUserExternalId, songID)
-               .Finally(BuildEnvelopeResult);
+                .Map(usersList => Mapper.Map<List<AppleSongResponse>>(usersList.data))
+                .Finally(BuildEnvelopeResult);
         }
 
         #endregion
