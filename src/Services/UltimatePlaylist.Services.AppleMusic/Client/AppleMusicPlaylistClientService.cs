@@ -68,6 +68,17 @@ namespace UltimatePlaylist.Services.AppleMusic.Client
                 .Map(response => response.Data[0]);
         }
 
+        
+        public async Task<Result<AppleSearchResponse>> GetAllSongs(Guid userExternalId, string queryParam)
+        {            
+            return await GetSongs<AppleSearchResponse>(userExternalId, queryParam);
+        }
+
+        public async Task<Result<AppleSongIdResponse>> GetSongByID(Guid userExternalId, string songID)
+        {
+            return await GetSongByID<AppleSongIdResponse>(userExternalId, songID);
+        }
+
         #endregion
 
         #region Private methods
@@ -82,6 +93,16 @@ namespace UltimatePlaylist.Services.AppleMusic.Client
             }
 
             return await Get<TResponse>($"{BaseRequestUri}/{libraryResource.GetValue()}", userExternalId, queryString, pageOptions, locale);
+        }
+
+        private async Task<Result<TResponse>> GetSongs<TResponse>(Guid userExternalId, string queryParams)
+        {            
+            return await Get<TResponse>($"catalog/us/search?types=songs&term={queryParams}", userExternalId, null, null, null);
+        }
+
+        private async Task<Result<TResponse>> GetSongByID<TResponse>(Guid userExternalId, string songID)
+        {            
+            return await Get<TResponse>($"catalog/us/songs/{songID}", userExternalId, null, null, null);
         }
 
         #endregion

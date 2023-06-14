@@ -26,5 +26,10 @@ namespace UltimatePlaylist.Services.Common.Interfaces.AppleMusic.Client
             Guid userExternalId,
             AppleMusicResurceType libraryResource,
             AppleMusicCreatePlaylistRequestModel appleMusicCreatePlaylistRequestModel);
+
+        Task<Result<AppleSearchResponse>> GetAllSongs(Guid userExternalId, string queryParam);
+
+        Task<Result<AppleSongIdResponse>> GetSongByID(Guid userExternalId, string songID);
+
     }
 }

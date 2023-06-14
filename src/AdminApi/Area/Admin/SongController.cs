@@ -16,6 +16,7 @@ using UltimatePlaylist.Services.Common.Interfaces.Song;
 using UltimatePlaylist.Services.Common.Models.Song;
 using static UltimatePlaylist.Common.Mvc.Consts.Consts;
 using UltimatePlaylist.Database.Infrastructure.Entities.Song;
+using UltimatePlaylist.Services.Common.Interfaces.AppleMusic.Client;
 
 #endregion
 
@@ -35,6 +36,8 @@ namespace UltimatePlaylist.AdminApi.Area.Admin
 
         private readonly Lazy<ISongStatisticsService> SongStatisticsServiceProvider;
 
+        private readonly Lazy<IAppleMusicPlaylistClientService> AppleMusicPlaylistServiceProvider;
+
         #endregion
 
         #region Constructor(s)
@@ -42,11 +45,13 @@ namespace UltimatePlaylist.AdminApi.Area.Admin
         public SongController(
             Lazy<IMapper> mapperProvider,
             Lazy<ISongService> songServiceProvider,
-            Lazy<ISongStatisticsService> songStatisticsServiceProvider)
+            Lazy<ISongStatisticsService> songStatisticsServiceProvider,
+            Lazy<IAppleMusicPlaylistClientService> appleMusicPlaylistServiceProvider)
         {
             MapperProvider = mapperProvider;
             SongServiceProvider = songServiceProvider;
             SongStatisticsServiceProvider = songStatisticsServiceProvider;
+            AppleMusicPlaylistServiceProvider = appleMusicPlaylistServiceProvider;
         }
 
         #endregion
@@ -58,6 +63,8 @@ namespace UltimatePlaylist.AdminApi.Area.Admin
         private ISongService SongService => SongServiceProvider.Value;
 
         private ISongStatisticsService SongStatisticsService => SongStatisticsServiceProvider.Value;
+
+        private IAppleMusicPlaylistClientService AppleMusicPlaylistService => AppleMusicPlaylistServiceProvider.Value;
 
         #endregion
 
@@ -140,7 +147,24 @@ namespace UltimatePlaylist.AdminApi.Area.Admin
             return await SongService.EditSongAsync(mapped)
                .Finally(BuildEnvelopeResult);
         }
-            
+
+        [HttpGet("search-song-apple-music")]
+        [ProducesEmptyEnvelope(StatusCodes.Status200OK)]
+        public async Task<IActionResult> SearchSongAppleMusicAsync([FromQuery] string searchParam)
+        {
+
+            return await AppleMusicPlaylistService.GetAllSongs(XUserExternalId, searchParam)
+               .Finally(BuildEnvelopeResult);
+        }
+
+        [HttpGet("search-byID-apple-music")]
+        [ProducesEmptyEnvelope(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSongByID([FromQuery] string songID)
+        {
+            return await AppleMusicPlaylistService.GetSongByID(XUserExternalId, songID)
+               .Finally(BuildEnvelopeResult);
+        }
+
         #endregion
     }
 }
