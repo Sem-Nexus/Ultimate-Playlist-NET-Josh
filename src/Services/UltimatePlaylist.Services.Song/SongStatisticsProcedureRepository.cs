@@ -144,5 +144,24 @@ namespace UltimatePlaylist.Services.Song
 
         }
 
+        public async Task<Result<SongStatics>> GetSongStatics()
+        {
+
+            var from = DateTime.Parse("1800-01-01");
+            var to = DateTime.Now;
+
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[SongStatistics]");
+            builder.Append($"@From = '{GetDate(from)}',");
+            builder.Append($"@To = '{GetDate(to)}'");
+
+            var result = await Context
+                .SongStatics
+                .FromSqlRaw(builder.ToString()).ToListAsync();
+
+            return Result.Success(result.FirstOrDefault());
+
+        }
+
     }
 }

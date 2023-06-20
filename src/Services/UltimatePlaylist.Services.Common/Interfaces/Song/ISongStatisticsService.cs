@@ -3,6 +3,7 @@
 using CSharpFunctionalExtensions;
 using UltimatePlaylist.Common.Models;
 using UltimatePlaylist.Database.Infrastructure.Entities.Song;
+using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Models;
 using UltimatePlaylist.Services.Common.Models.Song;
 
@@ -21,5 +22,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Song
         Task<Result<IReadOnlyList<SongSocialMediaEntity>>> GetSongSocialMedia(string songId);
 
         Task<Result<IReadOnlyList<SongDSPEntity>>> GetSongDPS(string songId);
+
+        Task<Result<SongStatics>> GetSongStatics();
     }
 }

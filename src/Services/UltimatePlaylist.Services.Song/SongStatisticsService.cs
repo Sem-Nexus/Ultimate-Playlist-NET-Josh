@@ -91,6 +91,12 @@ namespace UltimatePlaylist.Services.Song
                    .Map(songs => Mapper.Map<IReadOnlyList<SongDSPEntity>>(songs));
         }
 
+        public async Task<Result<SongStatics>> GetSongStatics()
+        {
+            return await SongStatisticsProcedureRepository.GetSongStatics()
+                   .Map(songs => Mapper.Map<SongStatics>(songs));
+        }
+
         #endregion
     }
 }
