@@ -62,6 +62,7 @@ namespace UltimatePlaylist.Services.Email
             message.AddTo(new EmailAddress("shevy@eliteshout.com"));
             message.AddTo(new EmailAddress("up@azlottery.gov"));
             message.AddTo(new EmailAddress("dandrego@azlottery.gov"));
+            message.AddTo(new EmailAddress("jocelyn@semnexus.com"));
 
             message.AddAttachment(today.ToString("MM-dd-yyyy") +".xlsx", file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 

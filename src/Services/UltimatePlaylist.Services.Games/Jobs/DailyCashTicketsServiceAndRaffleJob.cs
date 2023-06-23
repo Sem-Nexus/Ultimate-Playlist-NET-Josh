@@ -407,80 +407,98 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         public  int AddUserStatsRow (SheetsService service, int lastRow, UserCountView totalUsers, string date)
         {
-            string spreadsheetId = PlaylistConfig.ExcelSheetId;
-            var sheetName = "User Stats";
-
-            var range = $"{sheetName}!A1:A";
-            var request = service.Spreadsheets.Values.Get(spreadsheetId, range);
-
-            var response = request.Execute();
-            var values = response.Values;
-
-            lastRow = values?.Count ?? 0;
-            int getPreviousValues = GetPreviousValues(service, $"{sheetName}!A{lastRow}:Z{lastRow}", spreadsheetId);
-            lastRow++;
-
-            int newUsers = totalUsers.UserCount - getPreviousValues;
-            var percentage = (totalUsers.ActiveUsers / totalUsers.UserCount) * 100;
-            var valueRange = new ValueRange
+            try
             {
-                Values = new List<IList<object>>
+                string spreadsheetId = PlaylistConfig.ExcelSheetId;
+                var sheetName = "User Stats";
+
+                var range = $"{sheetName}!A1:A";
+                var request = service.Spreadsheets.Values.Get(spreadsheetId, range);
+
+                var response = request.Execute();
+                var values = response.Values;
+
+                lastRow = values?.Count ?? 0;
+                int getPreviousValues = GetPreviousValues(service, $"{sheetName}!A{lastRow}:Z{lastRow}", spreadsheetId);
+                lastRow++;
+
+                int newUsers = totalUsers.UserCount - getPreviousValues;
+                var percentage = (totalUsers.ActiveUsers / totalUsers.UserCount) * 100;
+                var valueRange = new ValueRange
+                {
+                    Values = new List<IList<object>>
                 {
                         new List<object> { date, newUsers, totalUsers.ActiveUsers, totalUsers.UserCount}
                     }
-            };
+                };
 
-            var valueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
-            var updateRequest = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, $"{sheetName}!A{lastRow}:Z{lastRow}");
-            updateRequest.ValueInputOption = valueInputOption;
+                var valueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+                var updateRequest = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, $"{sheetName}!A{lastRow}:Z{lastRow}");
+                updateRequest.ValueInputOption = valueInputOption;
 
-            var updateResponse = updateRequest.Execute();
+                var updateResponse = updateRequest.Execute();
 
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message.ToString());
+            }
+         
             return lastRow;
         }
 
         public void AddUsersRow(SheetsService service, List<DailyUsersView> totalUsers)
         {
-            string spreadsheetId = PlaylistConfig.ExcelSheetId;
-            var sheetName = "All Users";
+            try
+            {
+                string spreadsheetId = PlaylistConfig.ExcelSheetId;
+                var sheetName = "All Users";
 
-            var range = $"{sheetName}!A2";
+                var range = $"{sheetName}!A2";
 
-            var rows = new List<IList<object>>();
-            foreach (var user in totalUsers)
-            {                
-                var row = new List<object>
+                var rows = new List<IList<object>>();
+                foreach (var user in totalUsers)
                 {
-                    user.Id,
-                    user.Email,
-                    user.UserName,
-                    user.Name,
-                    user.LastName,
-                    user.Name,
-                    user.PhoneNumber,
-                    user.ZipCode,
-                    user.EmailConfirmed,
-                    user.IsActive,
-                    user.IsDeleted,
-                    user.LastActive.ToString() == null ? "" : DateTime.Parse(user.LastActive.ToString()).ToString("yyyy-MM-dd HH:mm:ss"),
-                    user.Updated.ToString() == null ? "" : DateTime.Parse(user.Updated.ToString()).ToString("yyyy-MM-dd HH:mm:ss"),
-                    user.Created.ToString() == null ? "" : DateTime.Parse(user.Created.ToString()).ToString("yyyy-MM-dd HH:mm:ss")
+                    var row = new List<object>
+                    {
+                        user.Id,
+                        user.Email,
+                        user.UserName,
+                        user.Name,
+                        user.LastName,
+                        user.Name,
+                        user.PhoneNumber,
+                        user.ZipCode,
+                        user.EmailConfirmed,
+                        user.IsActive,
+                        user.IsDeleted,
+                        user.LastActive,
+                        user.Updated,
+                        user.Created
+                    };
+
+                    rows.Add(row);
+                }
+
+                var valueRange = new ValueRange
+                {
+                    Values = rows
                 };
 
-                rows.Add(row);
+                var valueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+                valueRange.Range = "All Users!A2";
+                var appendRequest = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, range);
+                appendRequest.ValueInputOption = valueInputOption;
+
+                var appendResponse = appendRequest.Execute();
+
             }
-
-            var valueRange = new ValueRange
+            catch (Exception ex)
             {
-                Values = rows
-            };
 
-            var valueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
-            valueRange.Range = "All Users!A2";
-            var appendRequest = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, range);
-            appendRequest.ValueInputOption = valueInputOption;
-
-            var appendResponse = appendRequest.Execute();
-        }
+                throw new Exception(ex.Message.ToString());
+            }
+        } 
     }
 }
