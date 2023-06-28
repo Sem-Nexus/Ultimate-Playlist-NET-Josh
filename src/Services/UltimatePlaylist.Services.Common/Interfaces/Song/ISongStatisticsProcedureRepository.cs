@@ -17,6 +17,8 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Song
 
         Task<Result<List<GeneralSongDataProcedureView>>> GetGeneralSongsData(Pagination pagination, SongsAnalyticsFilterServiceModel filterServiceModel);
 
+        Task<Result<List<GeneralMusicDataProcedureView>>> GetGeneralMusicData(Pagination pagination, SongsAnalyticsFilterServiceModel filterServiceModel);
+
         Task<Result<List<GeneralSongsAnalyticsFileInformationView>>> GetFileSongsData(Pagination pagination, SongsAnalyticsFilterServiceModel filter);
 
         Task<Result<SongEntity>> GetSongData(string externalID);

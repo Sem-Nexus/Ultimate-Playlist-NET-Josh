@@ -72,6 +72,38 @@ namespace UltimatePlaylist.Services.Song
             return Result.Success(data);
         }
 
+        public async Task<Result<List<GeneralMusicDataProcedureView>>> GetGeneralMusicData(
+            Pagination pagination,
+            SongsAnalyticsFilterServiceModel filter)
+        {
+            var minAge = filter.Age?.Min(x => x.MinAge) ?? null;
+            var maxAge = filter.Age?.Max(x => x.MaxAge) ?? null;
+            var minBirthDate = minAge.HasValue ? DateTime.UtcNow.AddYears(-minAge.Value) : DateTime.UtcNow;
+            var maxBirthDate = maxAge.HasValue ? DateTime.UtcNow.AddYears(-maxAge.Value) : DateTime.Parse("1800-01-01");
+            var timeRange = filter.TimeRange ?? DateTime.Parse("1800-01-01");
+            var genres = filter.MusicGenres.Any() ? string.Join(',', filter.MusicGenres) : string.Empty;
+            var genders = filter.Genders.Any() ? string.Join(',', filter.Genders) : string.Empty;
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[MusicAnalytics]");
+            builder.Append($"@BirthDateMin = '{GetDate(minBirthDate)}',");
+            builder.Append($"@BirthDateMax = '{GetDate(maxBirthDate)}',");
+            builder.Append($"@Gender = '{genders}',");
+            builder.Append($"@ZipCode = '{filter.ZipCode}',");
+            builder.Append($"@TimeRange = '{GetDate(timeRange)}',");
+            builder.Append($"@Skip = '{pagination?.Skip ?? 0}',");
+            builder.Append($"@Take = '{pagination?.PageSize ?? 20}',");
+            builder.Append($"@SortType = '{pagination?.OrderBy}',");
+            builder.Append($"@Genres = '{genres}',");
+            builder.Append($"@SearchValue = '{pagination?.SearchValue}'");
+
+            var data = await Context
+                .GeneralMusicDataProcedureViews
+                .FromSqlRaw(builder.ToString())
+                .ToListAsync();
+
+            return Result.Success(data);
+        }
+
         public async Task<Result<List<GeneralSongsAnalyticsFileInformationView>>> GetFileSongsData(
             Pagination pagination,
             SongsAnalyticsFilterServiceModel filter)

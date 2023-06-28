@@ -80,6 +80,15 @@ namespace UltimatePlaylist.AdminApi.Area.Admin
                .Finally(BuildEnvelopeResult);
         }
 
+        [HttpGet("music-list")]
+        [ProducesEnvelope(typeof(PaginatedResponse<MusicResponseModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> MusicListAsync()
+        {
+            return await SongStatisticsService.MusicListAsync(XPagination, new SongsAnalyticsFilterServiceModel())
+               .Map(songs => Mapper.Map<PaginatedResponse<MusicResponseModel>>(songs))
+               .Finally(BuildEnvelopeResult);
+        }
+
         [HttpGet("")]
         [ProducesEnvelope(typeof(SongEntity), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSong([FromQuery] string externalId)

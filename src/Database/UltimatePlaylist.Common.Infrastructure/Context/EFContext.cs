@@ -55,6 +55,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
 
         public DbSet<GeneralSongDataProcedureView> GeneralSongDataProcedureViews { get; set; }
 
+        public DbSet<GeneralMusicDataProcedureView> GeneralMusicDataProcedureViews { get; set; }
+
         public DbSet<GeneralSongsCountProcedureView> GeneralSongsCountProcedureViews { get; set; }
 
         public DbSet<GeneralSongsAnalyticsFileInformationView> GeneralSongsAnalyticsFileInformationViews { get; set; }

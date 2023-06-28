@@ -41,6 +41,8 @@ namespace UltimatePlaylist.Services.Song.Mapping
                 {
                     dst.AverageRating = dst.AverageRating.HasValue ? dst.AverageRating.Value.ToRound(2) : dst.AverageRating;
                 });
+
+            CreateMap<GeneralMusicDataProcedureView, GeneralMusicDataListItemReadServiceModel>();
             CreateMap<GeneralSongsAnalyticsFileInformationView, SongsAnalyticsFileServiceReadModel>();
         }
 

@@ -67,6 +67,25 @@ namespace UltimatePlaylist.Services.Song
                    .Map(songs => new PaginatedReadServiceModel<GeneralSongDataListItemReadServiceModel>(songs, pagination, count));
         }
 
+        public async Task<Result<PaginatedReadServiceModel<GeneralMusicDataListItemReadServiceModel>>> MusicListAsync(Pagination pagination, SongsAnalyticsFilterServiceModel filterServiceModel)
+        {
+            Result<List<GeneralMusicDataProcedureView>> songList = await SongStatisticsProcedureRepository.GetGeneralMusicData(pagination, filterServiceModel);
+            int count = 0;
+
+            if (pagination.SearchValue.IsNullOrEmpty())
+            {
+                count = await SongStatisticsProcedureRepository.GeneralSongsCount(filterServiceModel);
+            }
+            else
+            {
+                count = songList.Value.Count;
+            }
+
+            return songList
+                   .Map(songs => Mapper.Map<IReadOnlyList<GeneralMusicDataListItemReadServiceModel>>(songs))
+                   .Map(songs => new PaginatedReadServiceModel<GeneralMusicDataListItemReadServiceModel>(songs, pagination, count));
+        }
+
         public async Task<Result<IReadOnlyList<SongsAnalyticsFileServiceReadModel>>> GetDataForFile(Pagination pagination, SongsAnalyticsFilterServiceModel filterServiceModel)
         {
             return await SongStatisticsProcedureRepository.GetFileSongsData(pagination, filterServiceModel)

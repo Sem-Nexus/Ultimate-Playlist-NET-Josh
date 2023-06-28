@@ -15,6 +15,8 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Song
     {
         Task<Result<PaginatedReadServiceModel<GeneralSongDataListItemReadServiceModel>>> SongsListAsync(Pagination pagination, SongsAnalyticsFilterServiceModel filterServiceModel);
 
+        Task<Result<PaginatedReadServiceModel<GeneralMusicDataListItemReadServiceModel>>> MusicListAsync(Pagination pagination, SongsAnalyticsFilterServiceModel filterServiceModel);
+
         Task<Result<IReadOnlyList<SongsAnalyticsFileServiceReadModel>>> GetDataForFile(Pagination pagination, SongsAnalyticsFilterServiceModel filterServiceModel);
 
         Task<Result<SongEntity>> GetSongData(string externalID);
