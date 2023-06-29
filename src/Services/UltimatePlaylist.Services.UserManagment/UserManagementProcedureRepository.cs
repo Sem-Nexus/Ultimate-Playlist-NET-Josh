@@ -29,9 +29,11 @@ namespace UltimatePlaylist.Services.UserManagement
         public async Task<int> UsersCount(Pagination pagination, IEnumerable<FilterModel> filter)
         {
             var isActive = GetIsActive(filter);
+            var IsDeleted = GetIsDeleted(filter);
             var builder = new StringBuilder();
             builder.Append("[dbo].[UserManagementViewCount]");
             builder.Append($"@SearchValue = '{pagination.SearchValue}',");
+            builder.Append($"@IsDeleted = '{IsDeleted}',");
             builder.Append($"@IsActive = '{isActive}'");
 
             var data = await Context
@@ -47,6 +49,7 @@ namespace UltimatePlaylist.Services.UserManagement
             IEnumerable<FilterModel> filter)
         {
             var isActive = GetIsActive(filter);
+            var isDeleted = GetIsDeleted(filter);
             var timeRange = GetTimeRange(filter) ?? DateTime.Parse("1800-01-01");
             var builder = new StringBuilder();
             builder.Append("[dbo].[UserManagementView]");
@@ -55,6 +58,7 @@ namespace UltimatePlaylist.Services.UserManagement
             builder.Append($"@Skip = '{pagination?.Skip ?? 0}',");
             builder.Append($"@Take = '{pagination?.PageSize ?? 20}',");
             builder.Append($"@SortType = '{pagination?.OrderBy}',");
+            builder.Append($"@IsDeleted = '{isDeleted}',");
             builder.Append($"@IsActive = '{isActive}'");
 
             var data = await Context
@@ -96,6 +100,21 @@ namespace UltimatePlaylist.Services.UserManagement
                 if (isActiveFilter.Condition == ValueFilterCondition.Contains)
                 {
                     return isActive;
+                }
+            }
+
+            return null;
+        }
+
+        private bool? GetIsDeleted(IEnumerable<FilterModel> filter)
+        {
+            var isDeletedFilter = filter.SelectMany(x => x.ValueFilters).FirstOrDefault(x => x.FieldName.Equals("isDeleted", StringComparison.OrdinalIgnoreCase));
+
+            if (isDeletedFilter != null && bool.TryParse(isDeletedFilter.Value, out bool isDeleted))
+            {
+                if (isDeletedFilter.Condition == ValueFilterCondition.Contains)
+                {
+                    return isDeleted;
                 }
             }
 

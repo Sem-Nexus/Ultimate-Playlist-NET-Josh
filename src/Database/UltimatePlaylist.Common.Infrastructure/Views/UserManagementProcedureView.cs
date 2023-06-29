@@ -20,6 +20,8 @@
 
         public bool IsActive { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         public double TotalMinutesListened { get; set; }
 
         public double AvarageDailyPlays { get; set; }

@@ -18,6 +18,8 @@
 
         public bool IsActive { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         public TimeSpan TotalMinutesListened { get; set; } = new TimeSpan(hours: 1, minutes: 10, seconds: 20);
 
         public int AvarageDailyPlays { get; set; } = 10;
