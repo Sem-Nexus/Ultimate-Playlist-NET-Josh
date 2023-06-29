@@ -18,6 +18,8 @@
 
         public int NumberOfTimesAddedToDSP { get; set; }
 
+        public int UniquePlays { get; set; }
+
         public string CoverUrl { get; set; }
     }
 }

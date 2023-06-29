@@ -38,6 +38,7 @@ namespace UltimatePlaylist.AdminApi.Mappings
             CreateMap<GeneralMusicDataListItemReadServiceModel, MusicResponseModel>()
                 .ForMember(c => c.PrimaryGenres, opt => opt.MapFrom(i => i.Genre))
                 .ForMember(c => c.SecondaryGenres, opt => opt.MapFrom(i => i.GenreSecondary))
+                .ForMember(c => c.TotalSongPlays, opt => opt.MapFrom(i => i.UniquePlays))
                 .ForMember(c => c.TotalAddedToDSP, opt => opt.MapFrom(i => i.NumberOfTimesAddedToDSP));
 
             CreateMap<SongsAnalyticsFileServiceReadModel, SongsAnalyticsFileServiceResponseModel>();

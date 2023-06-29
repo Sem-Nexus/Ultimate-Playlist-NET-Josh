@@ -20,6 +20,8 @@ namespace UltimatePlaylist.AdminApi.Models.Song
 
         public string CoverUrl { get; set; }
 
+        public int TotalSongPlays { get; set; }
+
         public int TotalAddedToDSP { get; set; }
 
     }
