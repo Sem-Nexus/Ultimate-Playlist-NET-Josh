@@ -126,5 +126,26 @@ namespace UltimatePlaylist.Services.UserManagement
             var dateTimeFilters = filter.SelectMany(x => x.QuantityFilters).FirstOrDefault(x => x.FieldName.Equals("timeRange", StringComparison.OrdinalIgnoreCase));
             return dateTimeFilters != null ? Convert.ToInt64(dateTimeFilters?.Value).FromUnixTimestamp() : null;
         }
+
+        public async Task<Result<Engagement>> GetEngagementStatics()
+        {
+
+            var birthDateMax = DateTime.UtcNow;
+            var birthDateMin = DateTime.Parse("1800-01-01");
+
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[Engagement]");
+            builder.Append($"@BirthDateMax = '{GetDate(birthDateMin)}',");
+            builder.Append($"@BirthDateMin = '{GetDate(birthDateMax)}',");
+            builder.Append($"@Gender = '',");
+            builder.Append($"@ZipCode = ''");
+
+            var result = await Context
+                .Engagement
+                .FromSqlRaw(builder.ToString()).ToListAsync();
+
+            return Result.Success(result.FirstOrDefault());
+
+        }
     }
 }

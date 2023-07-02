@@ -8,6 +8,7 @@ using UltimatePlaylist.Common.Filters.Models;
 using UltimatePlaylist.Common.Mvc.Attributes;
 using UltimatePlaylist.Common.Mvc.Controllers;
 using UltimatePlaylist.Common.Mvc.Paging;
+using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Interfaces.User;
 using UltimatePlaylist.Services.Common.Models.UserManagment;
 using static UltimatePlaylist.Common.Mvc.Consts.Consts;
@@ -45,6 +46,19 @@ namespace UltimatePlaylist.AdminApi.Area.Admin
         private IMapper Mapper => MapperProvider.Value;
 
         private IUserManagementService UserManagementService => UserManagementServiceProvider.Value;
+
+        #endregion
+
+        #region GET
+
+        [HttpGet("engagement-statics")]
+        [ProducesEnvelope(typeof(Engagement), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSongDPS()
+        {
+            return await UserManagementService.GetEngagementStatics()
+               .Map(songs => Mapper.Map<Engagement>(songs))
+               .Finally(BuildEnvelopeResult);
+        }
 
         #endregion
 

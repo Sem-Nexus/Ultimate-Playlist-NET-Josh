@@ -9,6 +9,7 @@ using UltimatePlaylist.Common.Mvc.Interface;
 using UltimatePlaylist.Database.Infrastructure.Entities.Identity;
 using UltimatePlaylist.Database.Infrastructure.Entities.Identity.Specifications;
 using UltimatePlaylist.Database.Infrastructure.Repositories.Interfaces;
+using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Interfaces.User;
 using UltimatePlaylist.Services.Common.Models;
 using UltimatePlaylist.Services.Common.Models.UserManagment;
@@ -97,6 +98,12 @@ namespace UltimatePlaylist.Services.UserManagement
         {
             return await UserManagementProcedureRepository.GetListenersStatistics(serviceModel)
                 .Map(statistics => Mapper.Map<ListenersStatisticsReadServiceModel>(statistics));
+        }
+
+        public async Task<Result<Engagement>> GetEngagementStatics()
+        {
+            return await UserManagementProcedureRepository.GetEngagementStatics()
+                .Map(statistics => Mapper.Map<Engagement>(statistics));
         }
 
         #endregion

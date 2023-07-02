@@ -17,5 +17,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces.User
         Task<Result<List<UserManagementProcedureView>>> GetUsersManagementList(Pagination pagination, IEnumerable<FilterModel> filter);
 
         Task<Result<ListenersStatisticsProcedureView>> GetListenersStatistics(ListenersReadServiceModel serviceModel);
+
+        Task<Result<Engagement>> GetEngagementStatics();
     }
 }
