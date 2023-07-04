@@ -19,6 +19,7 @@ namespace UltimatePlaylist.AdminApi.Mappings
 
             CreateMap<RemoveSongRequestModel, RemoveSongWriteServiceModel>();
             CreateMap<SongsAnalyticsFilterRequestModel, SongsAnalyticsFilterServiceModel>();
+            CreateMap<EngagementFilterRequestModel, EngagementFilterServiceModel>();
             CreateMap<AgeRequestModel, AgeServiceModel>();
 
             // Read service model => Response model

@@ -12,6 +12,7 @@ using UltimatePlaylist.Database.Infrastructure.Repositories.Interfaces;
 using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Interfaces.User;
 using UltimatePlaylist.Services.Common.Models;
+using UltimatePlaylist.Services.Common.Models.Song;
 using UltimatePlaylist.Services.Common.Models.UserManagment;
 
 #endregion
@@ -100,9 +101,9 @@ namespace UltimatePlaylist.Services.UserManagement
                 .Map(statistics => Mapper.Map<ListenersStatisticsReadServiceModel>(statistics));
         }
 
-        public async Task<Result<Engagement>> GetEngagementStatics()
+        public async Task<Result<Engagement>> GetEngagementStatics(EngagementFilterServiceModel filter)
         {
-            return await UserManagementProcedureRepository.GetEngagementStatics()
+            return await UserManagementProcedureRepository.GetEngagementStatics(filter)
                 .Map(statistics => Mapper.Map<Engagement>(statistics));
         }
 

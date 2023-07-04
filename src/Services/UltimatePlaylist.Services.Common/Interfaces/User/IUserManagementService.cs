@@ -5,6 +5,7 @@ using UltimatePlaylist.Common.Filters.Models;
 using UltimatePlaylist.Common.Models;
 using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Models;
+using UltimatePlaylist.Services.Common.Models.Song;
 using UltimatePlaylist.Services.Common.Models.UserManagment;
 
 #endregion
@@ -21,6 +22,6 @@ namespace UltimatePlaylist.Services.Common.Interfaces.User
 
         Task<Result<ListenersStatisticsReadServiceModel>> GetListenersStatistics(ListenersReadServiceModel serviceModel);
 
-        Task<Result<Engagement>> GetEngagementStatics();
+        Task<Result<Engagement>> GetEngagementStatics(EngagementFilterServiceModel filter);
     }
 }

@@ -11,6 +11,7 @@ using UltimatePlaylist.Common.Models;
 using UltimatePlaylist.Database.Infrastructure.Context;
 using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Interfaces.User;
+using UltimatePlaylist.Services.Common.Models.Song;
 using UltimatePlaylist.Services.Common.Models.UserManagment;
 
 #endregion
@@ -127,20 +128,22 @@ namespace UltimatePlaylist.Services.UserManagement
             return dateTimeFilters != null ? Convert.ToInt64(dateTimeFilters?.Value).FromUnixTimestamp() : null;
         }
 
-        public async Task<Result<Engagement>> GetEngagementStatics()
+        public async Task<Result<Engagement>> GetEngagementStatics(EngagementFilterServiceModel filter)
         {
 
             var birthDateMax = DateTime.UtcNow;
             var birthDateMin = DateTime.Parse("1800-01-01");
+            var genders = filter.Genders.Any() ? string.Join(',', filter.Genders) : string.Empty;
 
             var builder = new StringBuilder();
             builder.Append("[dbo].[Engagement]");
             builder.Append($"@BirthDateMax = '{GetDate(birthDateMin)}',");
             builder.Append($"@BirthDateMin = '{GetDate(birthDateMax)}',");
-            builder.Append($"@Gender = '',");
-            builder.Append($"@ZipCode = ''");
+            builder.Append($"@Gender = '{genders}',");
+            builder.Append($"@Date = '{filter.Date}',");
+            builder.Append($"@ZipCode = '{filter.ZipCode}'");
 
-            var result = await Context
+            var result = await Context  
                 .Engagement
                 .FromSqlRaw(builder.ToString()).ToListAsync();
 
