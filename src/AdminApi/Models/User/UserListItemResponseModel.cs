@@ -25,5 +25,11 @@
         public int AvarageDailyPlays { get; set; } = 10;
 
         public TimeSpan AvarageTimeListened { get; set; } = new TimeSpan(hours: 1, minutes: 30, seconds: 20);
+
+        public int JackpotWon { get; set; }
+
+        public int PrizesWon { get; set; }
+
+        public string ZipCode { get; set; }
     }
 }

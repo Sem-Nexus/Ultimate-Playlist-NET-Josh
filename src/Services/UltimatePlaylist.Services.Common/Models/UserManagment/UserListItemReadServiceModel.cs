@@ -31,5 +31,11 @@ namespace UltimatePlaylist.Services.Common.Models.UserManagment
         public double AvarageDailyPlays { get; set; }
 
         public double AvarageTimeListened { get; set; }
+
+        public int JackpotWon { get; set; }
+
+        public int PrizesWon { get; set; }
+
+        public string ZipCode { get; set; }
     }
 }
