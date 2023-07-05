@@ -31,11 +31,15 @@ namespace UltimatePlaylist.Services.UserManagement
         {
             var isActive = GetIsActive(filter);
             var IsDeleted = GetIsDeleted(filter);
+            var zipCode = GetZipCode(filter) ?? "";
+            var genders = GetGenders(filter);
             var builder = new StringBuilder();
             builder.Append("[dbo].[UserManagementViewCount]");
             builder.Append($"@SearchValue = '{pagination.SearchValue}',");
             builder.Append($"@IsDeleted = '{IsDeleted}',");
-            builder.Append($"@IsActive = '{isActive}'");
+            builder.Append($"@IsActive = '{isActive}',");
+            builder.Append($"@Gender = '{genders}',");
+            builder.Append($"@ZipCode = '{zipCode}'");
 
             var data = await Context
                 .UserManagementProcedureCountViews
@@ -52,6 +56,8 @@ namespace UltimatePlaylist.Services.UserManagement
             var isActive = GetIsActive(filter);
             var isDeleted = GetIsDeleted(filter);
             var timeRange = GetTimeRange(filter) ?? DateTime.Parse("1800-01-01");
+            var zipCode = GetZipCode(filter) ?? "";
+            var genders = GetGenders(filter);
             var builder = new StringBuilder();
             builder.Append("[dbo].[UserManagementView]");
             builder.Append($"@SearchValue = '{pagination.SearchValue ?? string.Empty}',");
@@ -59,6 +65,8 @@ namespace UltimatePlaylist.Services.UserManagement
             builder.Append($"@Skip = '{pagination?.Skip ?? 0}',");
             builder.Append($"@Take = '{pagination?.PageSize ?? 20}',");
             builder.Append($"@SortType = '{pagination?.OrderBy}',");
+            builder.Append($"@Gender = '{genders}',");
+            builder.Append($"@ZipCode = '{zipCode}',");
             builder.Append($"@IsDeleted = '{isDeleted}',");
             builder.Append($"@IsActive = '{isActive}'");
 
@@ -149,6 +157,24 @@ namespace UltimatePlaylist.Services.UserManagement
 
             return Result.Success(result.FirstOrDefault());
 
+        }
+
+        private string GetZipCode(IEnumerable<FilterModel> filter)
+        {
+            var zipCode = filter.Select(x => x.Filters.ZipCode).FirstOrDefault();
+
+            return zipCode;
+        }
+
+        private string GetGenders(IEnumerable<FilterModel> filter)
+        {
+            var genders = filter.Select(x => x.Filters.Genders).FirstOrDefault();
+            if (genders == null)
+            {
+                return "";
+            }
+
+            return string.Join(',', genders);
         }
     }
 }
