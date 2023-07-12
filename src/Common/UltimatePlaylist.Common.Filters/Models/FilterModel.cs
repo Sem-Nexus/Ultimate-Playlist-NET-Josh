@@ -35,8 +35,18 @@ namespace UltimatePlaylist.Common.Filters.Models
 
             public string ZipCode { get; set; }
 
+            public List<AgeServiceModel> Age { get; set; }
+
+            public DateTime? TimeRange { get; set; }
+
         }
 
+        public class AgeServiceModel
+        {
+            public int? MinAge { get; set; }
+
+            public int? MaxAge { get; set; }
+        }
         #endregion
     }
 }

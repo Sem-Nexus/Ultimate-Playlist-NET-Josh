@@ -13,7 +13,6 @@ using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Interfaces.User;
 using UltimatePlaylist.Services.Common.Models.Song;
 using UltimatePlaylist.Services.Common.Models.UserManagment;
-
 #endregion
 
 namespace UltimatePlaylist.Services.UserManagement
@@ -33,8 +32,16 @@ namespace UltimatePlaylist.Services.UserManagement
             var IsDeleted = GetIsDeleted(filter);
             var zipCode = GetZipCode(filter) ?? "";
             var genders = GetGenders(filter);
+            var ageRange = GetAge(filter);
+            var minBirthDate = ageRange.MinAge.HasValue ? DateTime.UtcNow.AddYears(-ageRange.MinAge.Value) : DateTime.UtcNow;
+            var maxBirthDate = ageRange.MaxAge.HasValue ? DateTime.UtcNow.AddYears(-ageRange.MaxAge.Value) : DateTime.Parse("1800-01-01");
+            var timeRange = GetTimeRangeFilter(filter) ?? DateTime.Parse("1800-01-01");
+
             var builder = new StringBuilder();
             builder.Append("[dbo].[UserManagementViewCount]");
+            builder.Append($"@BirthDateMin = '{GetDate(minBirthDate)}',");
+            builder.Append($"@BirthDateMax = '{GetDate(maxBirthDate)}',");
+            builder.Append($"@TimeRange = '{GetDate(timeRange)}',");
             builder.Append($"@SearchValue = '{pagination.SearchValue}',");
             builder.Append($"@IsDeleted = '{IsDeleted}',");
             builder.Append($"@IsActive = '{isActive}',");
@@ -55,11 +62,17 @@ namespace UltimatePlaylist.Services.UserManagement
         {
             var isActive = GetIsActive(filter);
             var isDeleted = GetIsDeleted(filter);
-            var timeRange = GetTimeRange(filter) ?? DateTime.Parse("1800-01-01");
+            var timeRange = GetTimeRangeFilter(filter) ?? DateTime.Parse("1800-01-01");
             var zipCode = GetZipCode(filter) ?? "";
             var genders = GetGenders(filter);
+            var ageRange = GetAge(filter);
+            var minBirthDate = ageRange.MinAge.HasValue ? DateTime.UtcNow.AddYears(-ageRange.MinAge.Value) : DateTime.UtcNow;
+            var maxBirthDate = ageRange.MaxAge.HasValue ? DateTime.UtcNow.AddYears(-ageRange.MaxAge.Value) : DateTime.Parse("1800-01-01");
+
             var builder = new StringBuilder();
             builder.Append("[dbo].[UserManagementView]");
+            builder.Append($"@BirthDateMin = '{GetDate(minBirthDate)}',");
+            builder.Append($"@BirthDateMax = '{GetDate(maxBirthDate)}',");
             builder.Append($"@SearchValue = '{pagination.SearchValue ?? string.Empty}',");
             builder.Append($"@TimeRange = '{GetDate(timeRange)}',");
             builder.Append($"@Skip = '{pagination?.Skip ?? 0}',");
@@ -175,6 +188,25 @@ namespace UltimatePlaylist.Services.UserManagement
             }
 
             return string.Join(',', genders);
+        }
+
+        private AgeServiceModel GetAge(IEnumerable<FilterModel> filter)
+        {
+            var ageRange = filter.Select(x => x.Filters.Age).FirstOrDefault();
+            var minAge = ageRange?.Min(x => x.MinAge) ?? null;
+            var maxAge = ageRange?.Max(x => x.MaxAge) ?? null;
+
+            AgeServiceModel ageRanges = new AgeServiceModel();
+            ageRanges.MaxAge = maxAge;
+            ageRanges.MinAge = minAge;
+
+            return ageRanges;
+        }
+
+        private DateTime? GetTimeRangeFilter(IEnumerable<FilterModel> filter)
+        {
+            var dateTimeFilters = filter.Select(x => x.Filters.TimeRange).FirstOrDefault();
+            return dateTimeFilters;
         }
     }
 }
