@@ -90,8 +90,14 @@ namespace UltimatePlaylist.Common.Mvc.Extensions
         {
             services.AddHangfire(x => x.UseSqlServerStorage(connectionString,
                 new SqlServerStorageOptions
-                {
-                    CommandTimeout = TimeSpan.FromMinutes(10),
+                {                 
+                    //CommandTimeout = TimeSpan.FromMinutes(30),
+
+                    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                    QueuePollInterval = TimeSpan.Zero,
+                    UsePageLocksOnDequeue = false,
+                    DisableGlobalLocks = false
                 }));
             services.AddHangfireServer();
             return services;

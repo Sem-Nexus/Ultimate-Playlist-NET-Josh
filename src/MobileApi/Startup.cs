@@ -96,6 +96,7 @@ namespace UltimatePlaylist.MobileApi
 
             services.AddDbContext<EFContext>(options => options.UseSqlServer(connectionString, builder =>
             {
+                builder.CommandTimeout(300);
                 builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null);
             }));
             var jwtOptions = services

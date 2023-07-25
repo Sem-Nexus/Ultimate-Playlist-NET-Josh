@@ -79,7 +79,10 @@ namespace UltimatePlaylist.AdminApi
                     opt.RegisterValidatorsFromAssemblies(ServiceAssemblies.Append(typeof(Startup).Assembly));
                     opt.LocalizationEnabled = false;
                 })
-                .AddNewtonsoftJson(options => options.SerializerSettings.SetupJsonSettings())
+                .AddNewtonsoftJson(options => {
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    options.SerializerSettings.SetupJsonSettings();
+                })
                 .ConfigureApiBehaviorOptions(opt =>
                 {
                     opt.SuppressModelStateInvalidFilter = true;
