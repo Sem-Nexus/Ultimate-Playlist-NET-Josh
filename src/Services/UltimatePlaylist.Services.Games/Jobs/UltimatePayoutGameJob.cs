@@ -143,6 +143,12 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 nextGameReward = GamesConfig.UltimateBaseReward;
             }
 
+            DateTime lastDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1).AddMonths(1).AddDays(-1);
+            if(currentDate.Day == lastDayOfMonth.Day)
+            {
+                nextGameReward += 5000;
+            }
+
             todaysGame.FirstNumber = numbers.FirstNumber;
             todaysGame.SecondNumber = numbers.SecondNumber;
             todaysGame.ThirdNumber = numbers.ThirdNumber;
@@ -156,7 +162,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
             {
                 GameDate = currentDate.AddDays(1),
                 Reward = nextGameReward,
-            });      
+            });
         }
 
         #endregion
