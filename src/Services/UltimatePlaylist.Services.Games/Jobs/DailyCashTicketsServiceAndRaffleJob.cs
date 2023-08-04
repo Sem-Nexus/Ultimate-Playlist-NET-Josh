@@ -374,7 +374,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
                 AddUserStatsRow(service, lastRow, totalUsers, date);
                 AddUsersRow(service, dailyUsers);
-                AddUsersWithTickers(service);
+                await AddUsersWithTickers(service);
 
             }
             catch (Exception ex)
@@ -502,25 +502,27 @@ namespace UltimatePlaylist.Services.Games.Jobs
             }
         }
 
-        public async void AddUsersWithTickers(SheetsService service)
+        public async Task<ActiveUsers> AddUsersWithTickers(SheetsService service)
         {
             try
             {
                 string spreadsheetId = PlaylistConfig.ExcelSheetId;
                 var sheetName = "User Stats";
 
-                var range = $"{sheetName}!F2:G2";
+                var range = $"{sheetName}!F2:I2";
 
                 var totalUsers = await TicketProcedureRepository.GetActiveUserTokensCount();
 
                 int sevenDaysAgo = totalUsers.Value.TotalActiveUsers7;
                 int thirtyDaysAgo = totalUsers.Value.TotalActiveUsers30;
+                int uniqueSevenDaysAgo = totalUsers.Value.TotalUniqueActiveUsers7;
+                int uniqueThirtyDaysAgo = totalUsers.Value.TotalUniqueActiveUsers30;
 
                 var valueRange = new ValueRange
                 {
                     Values = new List<IList<object>>
                     {
-                        new List<object> { sevenDaysAgo, thirtyDaysAgo }
+                        new List<object> { sevenDaysAgo, thirtyDaysAgo, uniqueSevenDaysAgo, uniqueThirtyDaysAgo }
                     }
                 };
 
@@ -531,6 +533,8 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 updateRequest.ValueInputOption = valueInputOption;
 
                 var appendResponse = updateRequest.Execute();
+
+                return totalUsers.Value;
             }
             catch (Exception ex)
             {
