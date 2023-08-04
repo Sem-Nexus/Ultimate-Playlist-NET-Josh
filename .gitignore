@@ -345,6 +345,7 @@ healthchecksdb
 /.vscode/launch.json
 DockerRestoreProjectFiles.tar
 Generated/
+.github/
 
 # logs
 logs/
