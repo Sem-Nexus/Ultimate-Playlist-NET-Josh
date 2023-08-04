@@ -374,6 +374,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
                 AddUserStatsRow(service, lastRow, totalUsers, date);
                 AddUsersRow(service, dailyUsers);
+                AddUsersWithTickers(service);
 
             }
             catch (Exception ex)
@@ -499,6 +500,43 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
                 throw new Exception(ex.Message.ToString());
             }
-        } 
+        }
+
+        public async void AddUsersWithTickers(SheetsService service)
+        {
+            try
+            {
+                string spreadsheetId = PlaylistConfig.ExcelSheetId;
+                var sheetName = "User Stats";
+
+                var range = $"{sheetName}!F2:G2";
+
+                var totalUsers = await TicketProcedureRepository.GetActiveUserTokensCount();
+
+                int sevenDaysAgo = totalUsers.Value.TotalActiveUsers7;
+                int thirtyDaysAgo = totalUsers.Value.TotalActiveUsers30;
+
+                var valueRange = new ValueRange
+                {
+                    Values = new List<IList<object>>
+                    {
+                        new List<object> { sevenDaysAgo, thirtyDaysAgo }
+                    }
+                };
+
+
+                var valueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+                var updateRequest = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, range);
+
+                updateRequest.ValueInputOption = valueInputOption;
+
+                var appendResponse = updateRequest.Execute();
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message.ToString());
+            }
+        }
     }
 }

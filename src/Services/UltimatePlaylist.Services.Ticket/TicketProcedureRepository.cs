@@ -1,6 +1,7 @@
 ﻿#region Usings
 
 using System.Text;
+using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;
 using UltimatePlaylist.Database.Infrastructure.Context;
 using UltimatePlaylist.Database.Infrastructure.Entities.Ticket;
@@ -96,6 +97,34 @@ namespace UltimatePlaylist.Services.Song
 
             return data;
 
+        }
+
+        public async Task<Result<ActiveUsers>> GetActiveUserTokensCount()
+        {
+
+            var birthDateMax = DateTime.UtcNow;
+            var birthDateMin = DateTime.Parse("1800-01-01");
+            var genders = string.Empty;
+            var zipCode = string.Empty;
+
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[ActiveUsers]");
+            builder.Append($"@BirthDateMax = '{GetDate(birthDateMin)}',");
+            builder.Append($"@BirthDateMin = '{GetDate(birthDateMax)}',");
+            builder.Append($"@Gender = '{genders}',");            
+            builder.Append($"@ZipCode = '{zipCode}'");
+
+            var result = await Context
+                .ActiveUsers
+                .FromSqlRaw(builder.ToString()).ToListAsync();
+
+            return Result.Success(result.FirstOrDefault());
+
+        }
+
+        private string GetDate(DateTime date)
+        {
+            return date.ToString("yyyy'-'MM'-'dd");
         }
 
     }

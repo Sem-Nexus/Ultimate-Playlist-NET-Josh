@@ -87,6 +87,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
 
         public DbSet<Engagement> Engagement { get; set; }
 
+        public DbSet<ActiveUsers> ActiveUsers { get; set; }
+
         #endregion
 
         #region Builder
@@ -102,6 +104,7 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
             builder.Entity<UserCountView>().HasNoKey();
             builder.Entity<SongStatics>().HasNoKey();
             builder.Entity<Engagement>().HasNoKey();
+            builder.Entity<ActiveUsers>().HasNoKey();
             builder.Entity<WinnersInformationEntity>(eb => eb.ToView("DailyCashWinners"));
     }
 
