@@ -468,12 +468,12 @@ namespace UltimatePlaylist.Services.Games.Jobs
                         user.UserName,
                         user.Name,
                         user.LastName,
-                        user.Name,
                         user.PhoneNumber,
                         user.ZipCode,
                         user.EmailConfirmed,
                         user.IsActive,
                         user.IsDeleted,
+                        user.BirthDate,
                         user.LastActive,
                         user.Updated,
                         user.Created
