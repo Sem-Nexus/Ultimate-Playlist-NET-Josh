@@ -208,5 +208,19 @@ namespace UltimatePlaylist.Services.UserManagement
             var dateTimeFilters = filter.Select(x => x.Filters.TimeRange).FirstOrDefault();
             return dateTimeFilters;
         }
+        
+        public async Task<Result<MedianUsersAge>> GetUsersMedianAge()
+        {
+
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[GetMedianUsersAge]");
+
+            var result = await Context
+                .MedianUsersAge
+                .FromSqlRaw(builder.ToString()).ToListAsync();
+
+            return Result.Success(result.FirstOrDefault());
+
+        }
     }
 }

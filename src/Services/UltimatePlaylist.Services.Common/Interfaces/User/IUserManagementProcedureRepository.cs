@@ -20,5 +20,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces.User
         Task<Result<ListenersStatisticsProcedureView>> GetListenersStatistics(ListenersReadServiceModel serviceModel);
 
         Task<Result<Engagement>> GetEngagementStatics(EngagementFilterServiceModel filter);
+
+        Task<Result<MedianUsersAge>> GetUsersMedianAge();
     }
 }

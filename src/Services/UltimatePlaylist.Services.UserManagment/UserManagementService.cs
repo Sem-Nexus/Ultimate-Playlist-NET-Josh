@@ -107,6 +107,13 @@ namespace UltimatePlaylist.Services.UserManagement
                 .Map(statistics => Mapper.Map<Engagement>(statistics));
         }
 
+        public async Task<Result<MedianUsersAge>> GetUsersMedianAge()
+        {
+            return await UserManagementProcedureRepository.GetUsersMedianAge()
+                        .Map(statistics => Mapper.Map<MedianUsersAge>(statistics));
+        }
+        
+
         #endregion
 
         #region Private method(s)

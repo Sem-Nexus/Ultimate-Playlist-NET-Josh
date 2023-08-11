@@ -92,6 +92,14 @@ namespace UltimatePlaylist.AdminApi.Area.Admin
                .Finally(BuildEnvelopeResult);
         }
 
+        [HttpGet("usersMedianAge")]
+        [ProducesEnvelope(typeof(MedianUsersAge), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetUsersMedianAge()
+        {
+            return await UserManagementService.GetUsersMedianAge()
+               .Map(medianAge => Mapper.Map<MedianUsersAge>(medianAge))
+               .Finally(BuildEnvelopeResult);
+        }
 
         #endregion
     }
