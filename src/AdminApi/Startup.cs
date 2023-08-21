@@ -81,7 +81,7 @@ namespace UltimatePlaylist.AdminApi
                 })
                 .AddNewtonsoftJson(options => {
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                    options.SerializerSettings.SetupJsonSettings();
+                    //options.SerializerSettings.SetupJsonSettings();
                 })
                 .ConfigureApiBehaviorOptions(opt =>
                 {
