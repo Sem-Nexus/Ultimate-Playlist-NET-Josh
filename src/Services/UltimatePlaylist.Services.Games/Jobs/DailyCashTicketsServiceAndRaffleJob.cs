@@ -112,11 +112,11 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         private ITicketProcedureRepository TicketProcedureRepository => TicketProcedureRepositoryProvider.Value;
 
-        public static DailyCashDrawingEntity Game;
-
         private IWinningsInfoService WinningsInfoService => WinningsInfoServiceProvider.Value;
 
         protected IEmailService EmailServices => EmailService;
+
+        public static DailyCashDrawingEntity Game;
 
         #endregion
 
@@ -124,16 +124,21 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         public async Task<object> RunDailyCashGame()
         {
-            var result = new LotteryWinnersReadServiceModel();
-            var obj = new {first = 0 , last = 0};
+            var result = new List<LotteryWinnersReadServiceModel>();            
+            Object[] obj = {
+                    new {first = 0 , last = 0},
+                    new {first = 0 , last = 0}
+             };
             try
             {
                 result = await GetTicketsAndWinners();
-                if (result.Counter > 0 )
+                if (result[1].Counter > 0)
                 {
                     var jobId = BackgroundJob.Schedule(() => CreateGame(), TimeSpan.FromMinutes(2));
-                    BackgroundJob.ContinueJobWith(jobId, () => AddWinnersAndFilterTickets(result), JobContinuationOptions.OnlyOnSucceededState);
-                    obj = new { first = result.LotteryWinnersReadServiceModels.Last().Id, last = result.LotteryWinnersReadServiceModels.First().Id };
+                    BackgroundJob.ContinueJobWith(jobId, () => AddWinnersAndFilterTickets(result[0]), JobContinuationOptions.OnlyOnSucceededState);                    
+                    BackgroundJob.ContinueJobWith(jobId, () => AddAlternateWinners(result[1]), JobContinuationOptions.OnlyOnSucceededState);
+                    obj[0] = new { first = result[0].LotteryWinnersReadServiceModels.Last().Id, last = result[0].LotteryWinnersReadServiceModels.First().Id };
+                    obj[1] = new { first = result[1].LotteryWinnersReadServiceModels.Last().Id, last = result[1].LotteryWinnersReadServiceModels.First().Id };
                     return obj;
                 } else
                 {
@@ -148,36 +153,44 @@ namespace UltimatePlaylist.Services.Games.Jobs
             }
         }
 
-        public async Task<LotteryWinnersReadServiceModel> GetTicketsAndWinners()
+        public async Task<List<LotteryWinnersReadServiceModel>> GetTicketsAndWinners()
         {
+            List<LotteryWinnersReadServiceModel> lotteryWinnersList = new List<LotteryWinnersReadServiceModel>();
             List<RaffleUserTicketReadServiceModel> dailyCashTickets = default;
 
             try
             {
                 var tickets = await DailyCashTicketsService.GetTicketsForDailyCashAsync();
-
-                if (tickets.Value.Any())
-                {
-                    dailyCashTickets = tickets.Value;
-                    var winners = RaffleService.GetRaffleWinners(dailyCashTickets, Selections).Value;
-
-                    if (!winners.Any())
+                int getWinnersLists = 0;
+                do
+                {                    
+                    if (tickets.Value.Any())
                     {
-                        Logger.LogError($"Error getting raffle winners");
-                        throw new Exception("Error in GetRaffleWinners");
+                        dailyCashTickets = tickets.Value;
+                        var winners = RaffleService.GetRaffleWinners(dailyCashTickets, Selections).Value;
+
+                        if (!winners.Any())
+                        {
+                            Logger.LogError($"Error getting raffle winners");
+                            throw new Exception("Error in GetRaffleWinners");
+                        }
+
+                        var response = new LotteryWinnersReadServiceModel();
+                        response.RaffleUserTicketReadServiceModel = winners;
+                        response.LotteryWinnersReadServiceModels = dailyCashTickets;
+                        response.Counter = winners.Count();
+
+                        lotteryWinnersList.Add(response);
+
+                        getWinnersLists++;                       
                     }
+                    else
+                    {
+                        throw new Exception("Error in GetTicketsAndWinners");
+                    }                    
+                } while ((getWinnersLists < 2));
 
-                    var response = new LotteryWinnersReadServiceModel();
-                    response.RaffleUserTicketReadServiceModel = winners;
-                    response.LotteryWinnersReadServiceModels = dailyCashTickets;
-                    response.Counter = winners.Count();
-
-                    return response;
-                }
-                else
-                {
-                    throw new Exception("Error in GetTicketsAndWinners");
-                }
+                return lotteryWinnersList;
             }
             catch (Exception ex)
             {
@@ -223,7 +236,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
         public async Task<long> AddWinnersForDailyCashAsync(LotteryWinnersReadServiceModel result)
         {
-
+                
             if (Game != null)
             {
                 try
@@ -542,5 +555,24 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 throw new Exception(ex.Message.ToString());
             }
         }
+
+        public async Task<long> AddAlternateWinners(LotteryWinnersReadServiceModel result)
+        {
+
+            if (Game != null)
+            {
+                try
+                {
+                    await WinningsService.AddAlternateWinnersForDailyCashAsync(result.RaffleUserTicketReadServiceModel.Select(i => i.UserExternalId).ToList(), Game.Id);
+                }
+                catch (Exception ex)
+                {
+                    await EmailServices.SendEmailCrashJob("AddAlternateWinnersForDailyCashAsync " + ex?.Message);
+                    throw new Exception("Error in AddAlternateWinnersForDailyCashAsync");
+                }
+            } 
+            return Game.Id;
+        }
+
     }
 }

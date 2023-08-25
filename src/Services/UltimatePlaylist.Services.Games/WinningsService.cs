@@ -19,16 +19,20 @@ namespace UltimatePlaylist.Services.Games
 
         private readonly Lazy<IRepository<WinningEntity>> WinningRepositoryProvider;
 
+        private readonly Lazy<IRepository<WinningAlternateEntity>> WinningAlternateRepositoryProvider;
+
         #endregion
 
         #region Constructor(s)
 
         public WinningsService(
             Lazy<IRepository<User>> userRepositoryProvider,
-            Lazy<IRepository<WinningEntity>> winningRepositoryProvider)
+            Lazy<IRepository<WinningEntity>> winningRepositoryProvider,
+            Lazy<IRepository<WinningAlternateEntity>> winningAlternateRepositoryProvider)
         {
             UserRepositoryProvider = userRepositoryProvider;
             WinningRepositoryProvider = winningRepositoryProvider;
+            WinningAlternateRepositoryProvider = winningAlternateRepositoryProvider;
         }
 
         #endregion
@@ -38,6 +42,8 @@ namespace UltimatePlaylist.Services.Games
         private IRepository<User> UserRepository => UserRepositoryProvider.Value;
 
         private IRepository<WinningEntity> WinningRepository => WinningRepositoryProvider.Value;
+
+        private IRepository<WinningAlternateEntity> WinningAlternateRepository => WinningAlternateRepositoryProvider.Value;
 
         #endregion
 
@@ -63,6 +69,26 @@ namespace UltimatePlaylist.Services.Games
             await WinningRepository.AddRangeAsync(winners);
 
             // TODO: Send Notifications to winners
+        }
+
+        public async Task AddAlternateWinnersForDailyCashAsync(IList<Guid> winnersExternalIds, long gameId)
+        {
+            var winners = new List<WinningAlternateEntity>();
+
+            var users = await UserRepository.ListAsync(new UserSpecification().ByExternalIds(winnersExternalIds.ToArray()));
+
+            for (int i = 0; i < winnersExternalIds.Count; i++)
+            {
+                winners.Add(new WinningAlternateEntity()
+                {
+                    Amount = GetAmmountByWinnerPlace(i),
+                    GameId = gameId,
+                    Status = WinningStatus.New,
+                    WinnerId = users.First(c => c.ExternalId == winnersExternalIds[i]).Id,
+                });
+            }
+
+            await WinningAlternateRepository.AddRangeAsync(winners);
         }
 
         public async Task AddWinnersForUltimateAsync(IList<Guid> winnersExternalIds, decimal reward, long gameId)

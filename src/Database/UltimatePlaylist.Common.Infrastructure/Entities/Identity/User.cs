@@ -96,6 +96,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Entities.Identity
 
         public virtual ICollection<WinningEntity> Winnings { get; set; }
 
+        public virtual ICollection<WinningAlternateEntity> WinningsAlternate { get; set; }
+
         public virtual ICollection<UserLotteryEntryEntity> UserLotteryEntries { get; set; }
 
         #endregion

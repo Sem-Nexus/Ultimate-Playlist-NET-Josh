@@ -15,6 +15,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Entities.Games
 
         public virtual ICollection<WinningEntity> Winnings { get; set; }
 
+        public virtual ICollection<WinningAlternateEntity> WinningsAlternate { get; set; }
+
         public bool IsFinished { get; set; }
     }
 }
