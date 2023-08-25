@@ -127,5 +127,13 @@ namespace UltimatePlaylist.Services.Song
             return date.ToString("yyyy'-'MM'-'dd");
         }
 
+        public async Task<List<WinnersAlternateInformationEntity>> GetWinnersAlternateData()
+        {
+            var data = await Context
+                .GetWinnersAlternateInformation
+                .ToListAsync();
+
+            return data.OrderByDescending(item => item.PrizeTier).ToList();
+        }
     }
 }

@@ -75,6 +75,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
 
         public DbSet<WinnersInformationEntity> GetWinnersInformation { get; set; }
 
+        public DbSet<WinnersAlternateInformationEntity> GetWinnersAlternateInformation { get; set; }
+
         public DbSet<SongSocialMediaEntity> SongSocialMedia { get; set; }
 
         public DbSet<SongDSPEntity> SongDPS { get; set; }
@@ -109,7 +111,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
             builder.Entity<ActiveUsers>().HasNoKey();
             builder.Entity<MedianUsersAge>().HasNoKey();
             builder.Entity<WinnersInformationEntity>(eb => eb.ToView("DailyCashWinners"));
-    }
+            builder.Entity<WinnersAlternateInformationEntity>(eb => eb.ToView("DailyCashWinnersAlternate"));
+        }
 
         #endregion
     }

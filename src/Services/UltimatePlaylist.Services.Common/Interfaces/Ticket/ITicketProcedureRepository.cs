@@ -19,6 +19,8 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Ticket
 
         Task<List<WinnersInformationEntity>> GetWinnersData();
 
+        Task<List<WinnersAlternateInformationEntity>> GetWinnersAlternateData();
+
         Task<UserCountView> GetTotalUsers();
 
         Task<List<DailyUsersView>> GetDailyUsersAdded();

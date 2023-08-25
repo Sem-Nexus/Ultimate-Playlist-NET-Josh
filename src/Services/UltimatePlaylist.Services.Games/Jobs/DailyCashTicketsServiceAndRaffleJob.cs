@@ -136,7 +136,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 {
                     var jobId = BackgroundJob.Schedule(() => CreateGame(), TimeSpan.FromMinutes(2));
                     BackgroundJob.ContinueJobWith(jobId, () => AddWinnersAndFilterTickets(result[0]), JobContinuationOptions.OnlyOnSucceededState);                    
-                    BackgroundJob.ContinueJobWith(jobId, () => AddAlternateWinners(result[1]), JobContinuationOptions.OnlyOnSucceededState);
+                    BackgroundJob.ContinueJobWith(jobId, () => AddAlternateWinners(result[1]), JobContinuationOptions.OnlyOnSucceededState);                    
                     obj[0] = new { first = result[0].LotteryWinnersReadServiceModels.Last().Id, last = result[0].LotteryWinnersReadServiceModels.First().Id };
                     obj[1] = new { first = result[1].LotteryWinnersReadServiceModels.Last().Id, last = result[1].LotteryWinnersReadServiceModels.First().Id };
                     return obj;
@@ -301,13 +301,14 @@ namespace UltimatePlaylist.Services.Games.Jobs
         {            
            
             List<WinnersInformationEntity> winners = await TicketProcedureRepository.GetWinnersData();
+            List<WinnersAlternateInformationEntity> winnersAlternate = await TicketProcedureRepository.GetWinnersAlternateData();
+
             if (winners.Any())
             {
                 DateTime endDay = DateTime.Now.AddDays(-1);
                 using (var package = new ExcelPackage())
                 {
-
-                    ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Winners");
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Winners");                   
 
                     worksheet.Cells[1, 1].Value = "Prize Tier";
                     worksheet.Cells[1, 2].Value = "Player Id";
@@ -355,6 +356,57 @@ namespace UltimatePlaylist.Services.Games.Jobs
                         worksheet.Cells.AutoFitColumns();
                         worksheet.Cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                     }
+
+                    #region Worksheet2
+                    ExcelWorksheet worksheet2 = package.Workbook.Worksheets.Add("WinnersAlternate");
+
+                    worksheet2.Cells[1, 1].Value = "Prize Tier";
+                    worksheet2.Cells[1, 2].Value = "Player Id";
+                    worksheet2.Cells[1, 3].Value = "User Name";
+                    worksheet2.Cells[1, 4].Value = "First Name";
+                    worksheet2.Cells[1, 5].Value = "Last Name";
+                    worksheet2.Cells[1, 6].Value = "Email";
+                    worksheet2.Cells[1, 7].Value = "ZipCode";
+                    worksheet2.Cells[1, 8].Value = "Phone Number";
+                    worksheet2.Cells[1, 9].Value = "Gender";
+                    worksheet2.Cells[1, 10].Value = "Game Id";
+                    worksheet2.Cells[1, 11].Value = "Win Date";
+                    worksheet2.Cells[1, 12].Value = "BirthDate";
+                    worksheet2.Cells[1, 13].Value = "Wins Count";
+                    worksheet2.Cells[1, 14].Value = "Total Wins Amount";
+                    worksheet2.Cells[1, 15].Value = "Register Date";
+
+                    for (int column = 1; column <= 15; column++)
+                    {
+                        using (var range = worksheet2.Cells[1, column, worksheet2.Dimension.End.Row, column])
+                        {
+                            range.Style.Font.Bold = true;
+                            range.AutoFitColumns();
+                        }
+                    }
+
+                    for (int i = 0; i < winnersAlternate.Count; i++)
+                    {
+                        WinnersAlternateInformationEntity data = winnersAlternate[i];
+                        worksheet2.Cells[i + 2, 1].Value = data.PrizeTier;
+                        worksheet2.Cells[i + 2, 2].Value = data.PlayerId;
+                        worksheet2.Cells[i + 2, 3].Value = data.UserName;
+                        worksheet2.Cells[i + 2, 4].Value = data.FirstName;
+                        worksheet2.Cells[i + 2, 5].Value = data.LastName;
+                        worksheet2.Cells[i + 2, 6].Value = data.Email;
+                        worksheet2.Cells[i + 2, 7].Value = data.ZipCode;
+                        worksheet2.Cells[i + 2, 8].Value = data.PhoneNumber;
+                        worksheet2.Cells[i + 2, 9].Value = data.Gender;
+                        worksheet2.Cells[i + 2, 10].Value = data.GameId;
+                        worksheet2.Cells[i + 2, 11].Value = endDay.ToString("yyyy-MM-dd");
+                        worksheet2.Cells[i + 2, 12].Value = DateTime.Parse(data.BirthDate.ToString()).ToString("yyyy-MM-dd");
+                        worksheet2.Cells[i + 2, 13].Value = data.WinsCount;
+                        worksheet2.Cells[i + 2, 14].Value = data.TotalWinsAmount;
+                        worksheet2.Cells[i + 2, 15].Value = DateTime.Parse(data.RegisterDate.ToString()).ToString("yyyy-MM-dd");
+                        worksheet2.Cells.AutoFitColumns();
+                        worksheet2.Cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    }
+                    #endregion
 
                     byte[] excelBytes = package.GetAsByteArray();
                     var excelBase64 = Convert.ToBase64String(excelBytes);
