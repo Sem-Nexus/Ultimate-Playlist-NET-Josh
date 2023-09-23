@@ -78,6 +78,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Entities.Identity
 
         public bool ShouldNotificationBeEnabled { get; set; }
 
+        public string Device { get; set; }
+
         #endregion
 
         #region Navigation properties

@@ -98,13 +98,13 @@ namespace UltimatePlaylist.Services.Identity.Services
             return userIdClaim;
         }
 
-        public async Task<Result<AuthenticationReadServiceModel>> RefreshAsync(string token, string refreshToken)
+        public async Task<Result<AuthenticationReadServiceModel>> RefreshAsync(string token, string refreshToken, string Device)
         {
             var principalClaims = GetPrincipalFromToken(token);
             var userIdClaim = principalClaims.FindFirst(JwtClaims.ExternalId)?.Value;
             var userEmailClaim = principalClaims.FindFirst(JwtClaims.Email)?.Value;
             var userId = new Guid(userIdClaim!).Decode(userEmailClaim!);
-
+            
             var user = await UserManager.Users.FirstOrDefaultAsync(u => u.ExternalId.Equals(userId));
             if (user is null)
             {
@@ -115,6 +115,7 @@ namespace UltimatePlaylist.Services.Identity.Services
             {
                 return Result.Failure<AuthenticationReadServiceModel>(ErrorType.TokenInvalid.ToString());
             }
+            user.Device = Device;
 
             return await GenerateAuthenticationResult(user);
         }
@@ -296,7 +297,7 @@ namespace UltimatePlaylist.Services.Identity.Services
             var jwtToken = await GenerateToken(user);
             var refreshToken = GenerateToken();
 
-            user.RefreshTokenHash = refreshToken;
+            user.RefreshTokenHash = refreshToken;            
             await UserManager.UpdateAsync(user);
             return await Task.FromResult(CreateResponse(jwtToken, refreshToken));
         }

@@ -28,5 +28,7 @@ namespace UltimatePlaylist.MobileApi.Models.Identity
 
         public bool? IsTermsAndConditionsRead { get; set; }
         public bool? IsAgeAgreementRead { get; set; }
+
+        public string Device { get; set; }
     }
 }

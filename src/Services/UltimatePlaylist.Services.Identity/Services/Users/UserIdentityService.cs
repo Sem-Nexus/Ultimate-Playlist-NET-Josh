@@ -103,6 +103,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
             }
 
             user.IsEmailChangeConfirmedFromWeb = false;
+            user.Device = userLoginWriteServiceModel.Device;
             await UserRepository.UpdateAndSaveAsync(user);
 
             return await GenerateAuthenticationResult(user);
@@ -134,6 +135,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
             newUser.Gender = gender;
             newUser.IsActive = true;
             newUser.ShouldNotificationBeEnabled = true;
+            newUser.Device = request.Device;
             if (string.IsNullOrEmpty(newUser.PhoneNumber))
             {
                 newUser.PhoneNumber = string.Empty;
@@ -158,7 +160,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
             return Result.Success();
         }
 
-        public async Task<Result<AuthenticationReadServiceModel>> ExternalLoginAsync(dynamic user, string provider)
+        public async Task<Result<AuthenticationReadServiceModel>> ExternalLoginAsync(dynamic user, string provider, string device)
         {
  
             var existingUser = await UserManager.FindByEmailAsync(user);
@@ -173,6 +175,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                 {
                     if (existingUser.ZipCode == null || existingUser.BirthDate == DateTime.MinValue)
                     {
+                        existingUser.Device = device;
                         var token = await GenerateAuthenticationResult(existingUser);
                         return new AuthenticationReadServiceModel
                         {
@@ -189,6 +192,7 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                     }
 
                 }
+                existingUser.Device = device;
                 await UserManager.AddLoginAsync(existingUser, new UserLoginInfo(provider, existingUser.UserName, existingUser.Email));
                 return await GenerateAuthenticationResult(existingUser);
 
@@ -205,7 +209,8 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
             {
                 UserName = "TemporaryUserName" + user,
                 Email = user,
-                Gender = gender
+                Gender = gender,
+                Device = device
             };
 
             var createdUser = await UserManager.CreateAsync(newUserFromGoogle);
@@ -249,39 +254,37 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                 request.PhoneNumber = string.Empty;
             }
 
+            var user = await UserManager.FindByIdAsync(userIdClaim);
+
             request.Username = request.Username.Trim();
-            var updatedUser = new User()
-            {
-                Id = Int32.Parse(userIdClaim),
-                UserName = request.Username,
-                Name = request.FirstName,
-                LastName = request.LastName,
-                Email = userEmailClaim,
-                Gender = gender,
-                IsActive = true,
-                ShouldNotificationBeEnabled = true,
-                PhoneNumber = request.PhoneNumber,
-                BirthDate = request.BirthDate,
-                ZipCode = request.ZipCode,
-                ExternalId = Guid.NewGuid(),
-                SecurityStamp = Guid.NewGuid().ToString(),
-                ConcurrencyStamp = request.ConcurrencyStamp,
-                EmailConfirmed = true
-            };
+            user.Id = Int32.Parse(userIdClaim);
+            user.UserName = request.Username;
+            user.Name = request.FirstName;
+            user.LastName = request.LastName;
+            user.Email = userEmailClaim;
+            user.Gender = gender;
+            user.IsActive = true;
+            user.ShouldNotificationBeEnabled = true;
+            user.PhoneNumber = request.PhoneNumber;
+            user.BirthDate = request.BirthDate;
+            user.ZipCode = request.ZipCode;
+            user.ExternalId = Guid.NewGuid();
+            user.SecurityStamp = Guid.NewGuid().ToString();
+            user.ConcurrencyStamp = request.ConcurrencyStamp;
+            user.EmailConfirmed = true;
 
-            var updateUser = await UserManager.UpdateAsync(updatedUser);
-
+            var updateUser = await UserManager.UpdateAsync(user);
             if (!updateUser.Succeeded)
             {
                 throw new LoginException(ErrorType.BadRequest);
             }
-            var roleResult = await UserManager.AddToRoleAsync(updatedUser, UserRole.User.ToString());
+            var roleResult = await UserManager.AddToRoleAsync(user, UserRole.User.ToString());
             if (!roleResult.Succeeded)
             {
                 throw new LoginException(ErrorType.UserCantBeAddedToRole);
             }
 
-            var token = await ExternalLoginAsync(userEmailClaim, request.Provider);
+            var token = await ExternalLoginAsync(userEmailClaim, request.Provider, user.Device);
 
             return token;
         }

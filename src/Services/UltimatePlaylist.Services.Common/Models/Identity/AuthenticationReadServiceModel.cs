@@ -8,5 +8,7 @@ namespace UltimatePlaylist.Services.Common.Models.Identity
         public string Token { get; set; }
 
         public string? ConcurrencyStamp { get; set; }
+
+        public string Device { get; set; }
     }
 }

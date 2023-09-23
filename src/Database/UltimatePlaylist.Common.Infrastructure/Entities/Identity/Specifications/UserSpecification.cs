@@ -58,6 +58,13 @@ namespace UltimatePlaylist.Database.Infrastructure.Entities.Identity.Specificati
 
             return this;
         }
+
+        public UserSpecification ByEmail(string email)
+        {
+            AddCriteria(s => s.Email == email);
+
+            return this;
+        }
         #endregion
 
         #region Include

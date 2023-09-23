@@ -111,7 +111,7 @@ namespace UltimatePlaylist.MobileApi.Areas.User
         [ProducesEnvelope(typeof(AuthenticationResponseModel), StatusCodes.Status200OK)]
         public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenRequestModel request)
         {
-            return await IdentityService.RefreshAsync(XToken, request.RefreshToken)
+            return await IdentityService.RefreshAsync(XToken, request.RefreshToken, request.Device)
                 .Map(authResponse => Mapper.Map<AuthenticationResponseModel>(authResponse))
                 .Finally(BuildEnvelopeResult);
         }
@@ -151,13 +151,13 @@ namespace UltimatePlaylist.MobileApi.Areas.User
             if (request.Provider == "Google")
             {
                 var googlePayload = await IdentityService.ValidateGoogleToken(request, null);
-                return await IdentityService.ExternalLoginAsync(Mapper.Map<string>(googlePayload.Value), request.Provider)
+                return await IdentityService.ExternalLoginAsync(Mapper.Map<string>(googlePayload.Value), request.Provider, request.Device)
                     .Map(loginServiceModel => Mapper.Map<AuthenticationReadServiceModel>(loginServiceModel))
                     .Finally(BuildEnvelopeResult);
             } else
             {
                 var applePayload = await IdentityService.ValidateAppleIdTokenAsync(request, null);
-                return await IdentityService.ExternalLoginAsync(Mapper.Map<string>(applePayload.Value), request.Provider)
+                return await IdentityService.ExternalLoginAsync(Mapper.Map<string>(applePayload.Value), request.Provider, request.Device)
                     .Map(loginServiceModel => Mapper.Map<AuthenticationReadServiceModel>(loginServiceModel))
                     .Finally(BuildEnvelopeResult);
             }

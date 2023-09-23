@@ -15,7 +15,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Identity
 
         Task<Result<AuthenticationReadServiceModel>> ChangePasswordAsync(ChangePasswordWriteServiceModel request);
 
-        Task<Result<AuthenticationReadServiceModel>> RefreshAsync(string token, string refreshToken);
+        Task<Result<AuthenticationReadServiceModel>> RefreshAsync(string token, string refreshToken, string? Device);
 
         Task<Result<AuthenticationReadServiceModel>> RegistrationConfirmationAsync(ConfirmEmailWriteServiceModel confirmEmailRequestDto);
 

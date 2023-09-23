@@ -4,5 +4,6 @@
     {
         public string Token { get; set; }
         public string Provider { get; set; }
+        public string Device { get; set; }
     }
 }
