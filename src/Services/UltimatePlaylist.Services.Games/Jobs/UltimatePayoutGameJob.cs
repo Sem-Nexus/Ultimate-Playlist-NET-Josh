@@ -143,8 +143,8 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 nextGameReward = GamesConfig.UltimateBaseReward;
             }
 
-            DateTime lastDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1).AddMonths(1).AddDays(-1);
-            if(currentDate.Day == lastDayOfMonth.Day)
+            DateTime firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+            if(currentDate.Day == firstDayOfMonth.Day)
             {
                 nextGameReward += 5000;
             }

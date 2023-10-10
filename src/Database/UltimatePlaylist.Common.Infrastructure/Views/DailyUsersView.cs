@@ -36,5 +36,7 @@ namespace UltimatePlaylist.Database.Infrastructure.Views
 
         public DateTime? Created { get; set; }
         public string BirthDate { get; set; }
+
+        public string Device { get; set; }
     }
 }
