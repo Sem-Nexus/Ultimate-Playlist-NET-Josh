@@ -108,7 +108,7 @@ namespace UltimatePlaylist.AdminApi.Area.Admin
         [ProducesEnvelope(typeof(AuthenticationResponseModel), StatusCodes.Status200OK)]
         public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenRequestModel request)
         {
-            return await IdentityService.RefreshAsync(XToken, request.RefreshToken)
+            return await IdentityService.RefreshAsync(XToken, request.RefreshToken, request.Device)
                 .Map(authResponse => Mapper.Map<AuthenticationResponseModel>(authResponse))
                 .Finally(BuildEnvelopeResult);
         }

@@ -93,6 +93,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
 
         public DbSet<MedianUsersAge> MedianUsersAge { get; set; }
 
+        public DbSet<DeactivatedUsers> DeactivatedUsers { get; set; }
+
         #endregion
 
         #region Builder

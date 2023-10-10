@@ -61,7 +61,7 @@ namespace UltimatePlaylist.Services.Personalization
 
         public UserProfileService(
             Lazy<UserManager<User>> userManagerProvider,
-            Lazy<IRepository<User>> userRepositoryProvider,
+            Lazy<IRepository<User>> userRepositoryProvider,            
             Lazy<IReadOnlyRepository<UserDspEntity>> userDspRepositoryProvider,
             Lazy<IAvatarFileService> avatarFileServiceProvider,
             Lazy<IReadOnlyRepository<AvatarFileEntity>> avatarFileRepositoryProvider,
@@ -73,7 +73,7 @@ namespace UltimatePlaylist.Services.Personalization
             Lazy<IUserBlacklistTokenStore> userBlacklistTokenStoreProvider)
         {
             UserManagerProvider = userManagerProvider;
-            UserRepositoryProvider = userRepositoryProvider;
+            UserRepositoryProvider = userRepositoryProvider;            
             UserDspRepositoryProvider = userDspRepositoryProvider;
             AvatarFileServiceProvider = avatarFileServiceProvider;
             AvatarFileRepositoryProvider = avatarFileRepositoryProvider;
@@ -280,7 +280,27 @@ namespace UltimatePlaylist.Services.Personalization
             _context.UserPlaylists.Where(x => x.UserId == user.Id).DeleteFromQuery();
             _context.UserDsps.Where(x => x.UserId == user.Id).DeleteFromQuery();
             _context.UserSongsHistory.Where(x => x.UserId == user.Id).DeleteFromQuery();
-            
+
+            var deactivateUser = new DeactivatedUsers()
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Name = user.Name,
+                GenderId = user.GenderId,
+                LastName = user.LastName,
+                ZipCode = user.ZipCode,
+                LastActive = user.LastActive,
+                Device = user.Device,
+                Created = user.Created,
+                ExternalId = user.ExternalId,
+                Updated = DateTime.UtcNow,
+                IsDeleted = user.IsDeleted,
+            };
+
+            await _context.DeactivatedUsers.AddAsync(deactivateUser);
+            await _context.SaveChangesAsync();
+
             var result = await UserManager.DeleteAsync(user);
             if (!result.Succeeded)
             {
