@@ -28,6 +28,7 @@ using UltimatePlaylist.Services.UserManagement;
 using UltimatePlaylist.Services.UserSong.Repositories;
 using Microsoft.Extensions.Configuration;
 using UltimatePlaylist.Services.Common.Interfaces.Ticket;
+using Newtonsoft.Json;
 
 #endregion
 
@@ -79,10 +80,11 @@ namespace UltimatePlaylist.AdminApi
                     opt.RegisterValidatorsFromAssemblies(ServiceAssemblies.Append(typeof(Startup).Assembly));
                     opt.LocalizationEnabled = false;
                 })
-                //.AddNewtonsoftJson(options => {
-                //    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                //    //options.SerializerSettings.SetupJsonSettings();
-                //})
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    options.SerializerSettings.SetupJsonSettings();
+                })
                 .ConfigureApiBehaviorOptions(opt =>
                 {
                     opt.SuppressModelStateInvalidFilter = true;
