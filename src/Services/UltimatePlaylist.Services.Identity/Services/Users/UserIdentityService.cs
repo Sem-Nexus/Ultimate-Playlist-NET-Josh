@@ -171,11 +171,11 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                     return Result.Failure<AuthenticationReadServiceModel>(ErrorMessages.EmailTaken);
                 }
 
+                existingUser.Device = device;
                 if (!existingUser.EmailConfirmed)
                 {
                     if (existingUser.ZipCode == null || existingUser.BirthDate == DateTime.MinValue)
-                    {
-                        existingUser.Device = device;
+                    {                        
                         var token = await GenerateAuthenticationResult(existingUser);
                         return new AuthenticationReadServiceModel
                         {
@@ -192,7 +192,6 @@ namespace UltimatePlaylist.Services.Identity.Services.Users
                     }
 
                 }
-                existingUser.Device = device;
                 await UserManager.AddLoginAsync(existingUser, new UserLoginInfo(provider, existingUser.UserName, existingUser.Email));
                 return await GenerateAuthenticationResult(existingUser);
 
