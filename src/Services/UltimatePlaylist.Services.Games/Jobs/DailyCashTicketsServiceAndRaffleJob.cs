@@ -42,6 +42,7 @@ using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using UltimatePlaylist.Database.Infrastructure.Views;
+using UltimatePlaylist.Database.Infrastructure.Entities.Identity;
 
 #endregion
 
@@ -433,6 +434,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
                 UserCountView totalUsers = await TicketProcedureRepository.GetTotalUsers();
                 List<DailyUsersView> dailyUsers = await TicketProcedureRepository.GetDailyUsersAdded();
+                List<DeactivatedUsers> dailyDeactivateUsers = await TicketProcedureRepository.GetDeactivateUsersAdded();
                 var credential = GoogleCredential.FromFile((@"C:\home\site\wwwroot\ultimate-play-list-sn-b736279e45c3.json"));
 
                 var service = new SheetsService(new BaseClientService.Initializer
@@ -444,6 +446,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 AddUserStatsRow(service, lastRow, totalUsers, date);
                 AddUsersRow(service, dailyUsers);
                 await AddUsersWithTickers(service);
+                await AddDeactivateUsersRow(service, dailyDeactivateUsers);
 
             }
             catch (Exception ex)
@@ -488,16 +491,14 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 var values = response.Values;
 
                 lastRow = values?.Count ?? 0;
-                int getPreviousValues = GetPreviousValues(service, $"{sheetName}!A{lastRow}:Z{lastRow}", spreadsheetId);
                 lastRow++;
-
-                int newUsers = totalUsers.UserCount - getPreviousValues;
+                
                 var percentage = (totalUsers.ActiveUsers / totalUsers.UserCount) * 100;
                 var valueRange = new ValueRange
                 {
                     Values = new List<IList<object>>
                     {
-                        new List<object> { date, newUsers, totalUsers.ActiveUsers, totalUsers.UserCount, null, totalUsers.Android, totalUsers.IOS }
+                        new List<object> { date, totalUsers.Registrations, totalUsers.ActiveUsers, totalUsers.UserCount, null, totalUsers.Android, totalUsers.IOS }
                     }
                 };
 
@@ -578,7 +579,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 string spreadsheetId = PlaylistConfig.ExcelSheetId;
                 var sheetName = "User Stats";
 
-                var range = $"{sheetName}!H2:K2";
+                var range = $"{sheetName}!H2:N2";
 
                 var totalUsers = await TicketProcedureRepository.GetActiveUserTokensCount();
 
@@ -586,12 +587,15 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 int thirtyDaysAgo = totalUsers.Value.TotalActiveUsers30;
                 int uniqueSevenDaysAgo = totalUsers.Value.TotalUniqueActiveUsers7;
                 int uniqueThirtyDaysAgo = totalUsers.Value.TotalUniqueActiveUsers30;
+                int uniqueDeactivate = totalUsers.Value.TotalUniqueDeactiveUsers;
+                int uniqueDeactivateSevenDaysAgo = totalUsers.Value.TotalUniqueDeactiveUsers7;
+                int uniqueDeactivateThirtyDaysAgo = totalUsers.Value.TotalUniqueDeactiveUsers30;
 
                 var valueRange = new ValueRange
                 {
                     Values = new List<IList<object>>
                     {
-                        new List<object> { sevenDaysAgo, thirtyDaysAgo, uniqueSevenDaysAgo, uniqueThirtyDaysAgo }
+                        new List<object> { sevenDaysAgo, thirtyDaysAgo, uniqueSevenDaysAgo, uniqueThirtyDaysAgo, uniqueDeactivate, uniqueDeactivateSevenDaysAgo, uniqueDeactivateThirtyDaysAgo }
                     }
                 };
 
@@ -629,6 +633,58 @@ namespace UltimatePlaylist.Services.Games.Jobs
             } 
             return Game.Id;
         }
+
+        public async Task AddDeactivateUsersRow(SheetsService service, List<DeactivatedUsers> totalUsers)
+        {
+            try
+            {
+                string spreadsheetId = PlaylistConfig.ExcelSheetId;
+                var sheetName = "Deactivated Users";
+
+                var range = $"{sheetName}!A2";
+
+                var rows = new List<IList<object>>();
+                foreach (var user in totalUsers)
+                {
+                    var row = new List<object>
+                    {
+                        user.Id,
+                        user.UserName,
+                        user.Email,
+                        user.PhoneNumber,
+                        user.Name,
+                        user.LastName,
+                        user.GenderId,
+                        user.ZipCode,
+                        DateTime.Parse(user.LastActive.ToString()).ToString("yyyy-MM-dd"),
+                        DateTime.Parse(user.Created.ToString()).ToString("yyyy-MM-dd"),
+                        DateTime.Parse(user.Updated.ToString()).ToString("yyyy-MM-dd"),
+                        user.Device
+                    };
+
+                    rows.Add(row);
+                }
+
+                var valueRange = new ValueRange
+                {
+                    Values = rows
+                };
+
+                var valueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+                valueRange.Range = "Deactivated Users!A2";
+                var appendRequest = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, range);
+                appendRequest.ValueInputOption = valueInputOption;
+
+                var appendResponse = appendRequest.Execute();
+
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message.ToString());
+            }
+        }
+
 
     }
 }

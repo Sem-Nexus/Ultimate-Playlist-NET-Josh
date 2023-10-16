@@ -4,6 +4,7 @@ using System.Text;
 using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;
 using UltimatePlaylist.Database.Infrastructure.Context;
+using UltimatePlaylist.Database.Infrastructure.Entities.Identity;
 using UltimatePlaylist.Database.Infrastructure.Entities.Ticket;
 using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Interfaces.Ticket;
@@ -97,6 +98,14 @@ namespace UltimatePlaylist.Services.Song
 
             return data;
 
+        }
+
+        public async Task<List<DeactivatedUsers>> GetDeactivateUsersAdded()
+        {
+            var data = await Context
+                .DeactivatedUsers.ToListAsync();
+
+            return data.OrderByDescending(_ => _.Updated).ToList();
         }
 
         public async Task<Result<ActiveUsers>> GetActiveUserTokensCount()

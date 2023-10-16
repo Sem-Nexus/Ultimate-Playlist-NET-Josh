@@ -12,6 +12,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Views
 
         public int ActiveUsers { get; set; }
 
+        public int Registrations { get; set; }
+
         public int IOS { get; set; }
 
         public int Android { get; set; }

@@ -1,6 +1,7 @@
 ﻿#region Usings
 
 using CSharpFunctionalExtensions;
+using UltimatePlaylist.Database.Infrastructure.Entities.Identity;
 using UltimatePlaylist.Database.Infrastructure.Entities.Ticket;
 using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Models.Games;
@@ -25,6 +26,8 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Ticket
 
         Task<List<DailyUsersView>> GetDailyUsersAdded();
 
-        Task<Result<ActiveUsers>> GetActiveUserTokensCount();          
+        Task<List<DeactivatedUsers>> GetDeactivateUsersAdded();        
+
+        Task<Result<ActiveUsers>> GetActiveUserTokensCount();
     }
 }

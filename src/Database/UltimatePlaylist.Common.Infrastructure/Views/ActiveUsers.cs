@@ -12,5 +12,11 @@ namespace UltimatePlaylist.Database.Infrastructure.Views
 
         public int TotalUniqueActiveUsers30 { get; set; }
 
+        public int TotalUniqueDeactiveUsers { get; set; }
+
+        public int TotalUniqueDeactiveUsers7 { get; set; }
+
+        public int TotalUniqueDeactiveUsers30 { get; set; }
+
     }
 }
