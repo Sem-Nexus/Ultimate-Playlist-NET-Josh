@@ -32,5 +32,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Ticket
 
         Task<TicketCount> TicketCount(Guid userExternalId);
 
+        Task<List<LeaderboardRankingTicket>> LeaderboardRankingTicket(Guid userExternalId);
+
     }
 }

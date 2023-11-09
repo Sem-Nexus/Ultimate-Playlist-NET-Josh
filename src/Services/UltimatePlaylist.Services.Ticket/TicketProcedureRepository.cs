@@ -168,5 +168,19 @@ namespace UltimatePlaylist.Services.Song
             return result.FirstOrDefault();
 
         }
+
+        public async Task<List<LeaderboardRankingTicket>> LeaderboardRankingTicket(Guid userExternalId)
+        {
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[LeaderboardTicketCountRankingSP]");
+            builder.Append($"@ExternalId = '{userExternalId}'");
+
+            var result = await Context
+                .LeaderboardTicket
+                .FromSqlRaw(builder.ToString()).ToListAsync();
+
+            return result;
+
+        }
     }
 }

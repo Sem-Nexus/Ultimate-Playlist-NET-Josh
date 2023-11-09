@@ -12,6 +12,7 @@ using UltimatePlaylist.Database.Infrastructure.Repositories.Interfaces;
 using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Database.Infrastructure.Views.Specifications;
 using UltimatePlaylist.Services.Common.Interfaces.Leaderboard;
+using UltimatePlaylist.Services.Common.Interfaces.Ticket;
 using UltimatePlaylist.Services.Common.Models.Files;
 using UltimatePlaylist.Services.Common.Models.Leaderboard;
 
@@ -31,6 +32,8 @@ namespace UltimatePlaylist.Services.Leaderboard
 
         private readonly Lazy<IReadOnlyRepository<LeaderboardRankingByTicketCountView>> LeaderboardRankingByTicketCountViewRepositoryProvider;
 
+        private readonly Lazy<ITicketProcedureRepository> TicketProcedureRepositoryProvider;
+
         private readonly Lazy<ILogger<LeaderboardService>> LoggerProvider;
 
         private readonly Lazy<IMapper> MapperProvider;
@@ -44,6 +47,7 @@ namespace UltimatePlaylist.Services.Leaderboard
             Lazy<IReadOnlyRepository<UserPlaylistSongEntity>> userPlaylistSongRepositoryProvider,
             Lazy<IReadOnlyRepository<LeaderboardRankingBySongCountView>> leaderboardRankingBySongCountViewRepositoryProvider,
             Lazy<IReadOnlyRepository<LeaderboardRankingByTicketCountView>> leaderboardRankingByTicketCountViewRepositoryProvider,
+            Lazy<ITicketProcedureRepository> ticketProcedureRepositoryProvider,
             Lazy<ILogger<LeaderboardService>> loggerProvider,
             Lazy<IMapper> mapperProvider)
         {
@@ -51,6 +55,7 @@ namespace UltimatePlaylist.Services.Leaderboard
             UserPlaylistSongRepositoryProvider = userPlaylistSongRepositoryProvider;
             LeaderboardRankingBySongCountViewRepositoryProvider = leaderboardRankingBySongCountViewRepositoryProvider;
             LeaderboardRankingByTicketCountViewRepositoryProvider = leaderboardRankingByTicketCountViewRepositoryProvider;
+            TicketProcedureRepositoryProvider = ticketProcedureRepositoryProvider;
             LoggerProvider = loggerProvider;
             MapperProvider = mapperProvider;
         }
@@ -66,6 +71,8 @@ namespace UltimatePlaylist.Services.Leaderboard
         private IReadOnlyRepository<LeaderboardRankingBySongCountView> LeaderboardRankingBySongCountViewRepository => LeaderboardRankingBySongCountViewRepositoryProvider.Value;
 
         private IReadOnlyRepository<LeaderboardRankingByTicketCountView> LeaderboardRankingByTicketCountViewRepository => LeaderboardRankingByTicketCountViewRepositoryProvider.Value;
+
+        private ITicketProcedureRepository TicketProcedureRepository => TicketProcedureRepositoryProvider.Value;
 
         private ILogger<LeaderboardService> Logger => LoggerProvider.Value;
 
@@ -100,16 +107,19 @@ namespace UltimatePlaylist.Services.Leaderboard
             var userSongStats = await LeaderboardRankingBySongCountViewRepository.FirstOrDefaultAsync(new LeaderboardRankingBySongCountViewSpecification()
                 .ByUserExternalId(user.ExternalId));
 
-            var userTicketStats = await LeaderboardRankingByTicketCountViewRepository.FirstOrDefaultAsync(new LeaderboardRankingByTicketCountViewSpecification()
-                .ByUserExternalId(user.ExternalId));
+            //var userTicketStats = await LeaderboardRankingByTicketCountViewRepository.FirstOrDefaultAsync(new LeaderboardRankingByTicketCountViewSpecification()
+            //    .ByUserExternalId(user.ExternalId));
 
+            var ticketCount = await TicketProcedureRepository.LeaderboardRankingTicket(user.ExternalId);
+            var userTickets = ticketCount.FirstOrDefault();
+            
             return Result.Success()
                 .Map(() => Mapper.Map<LeaderboardUserScoresReadServiceModel>(userSongStats))
                 .CheckIf(mapped => mapped is null, mapped => Result.Failure<LeaderboardReadServiceModel>(ErrorMessages.UserDoesNotExist))
                 .Tap(mapped =>
                 {
-                    mapped.TicketCount = userTicketStats?.TicketCount ?? 0;
-                    mapped.TicketRankingPosition = userTicketStats?.RankingPosition ?? 0;
+                    mapped.TicketCount = (int)userTickets.TicketCount;
+                    mapped.TicketRankingPosition = userTickets?.RankingPosition ?? 0;
                 })
                 .Map(mapped => Mapper.Map<LeaderboardReadServiceModel>(mapped));
         }
@@ -119,8 +129,10 @@ namespace UltimatePlaylist.Services.Leaderboard
             var songCountRanking = await LeaderboardRankingBySongCountViewRepository.ListAsync(
                 new LeaderboardRankingBySongCountViewSpecification().Paged(new Pagination(50, 1)));
 
-            var ticketCountRanking = await LeaderboardRankingByTicketCountViewRepository.ListAsync(
-                new LeaderboardRankingByTicketCountViewSpecification().Paged(new Pagination(50, 1)));
+            //var ticketCountRanking = await LeaderboardRankingByTicketCountViewRepository.ListAsync(
+            //    new LeaderboardRankingByTicketCountViewSpecification().Paged(new Pagination(50, 1)));
+
+            var ticketCountRanking = await TicketProcedureRepository.LeaderboardRankingTicket(Guid.Empty);
 
             leaderboardReadServiceModel.OtherUsersSongListeningRanking = Mapper.Map<IList<LeaderboardOtherUserScoresReadServiceModel>>(songCountRanking);
 

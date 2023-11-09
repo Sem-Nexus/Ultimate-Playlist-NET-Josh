@@ -26,6 +26,9 @@ namespace UltimatePlaylist.Services.Leaderboard.Mappings
             CreateMap<LeaderboardRankingByTicketCountView, LeaderboardOtherUserScoresReadServiceModel>()
                 .ForMember(s => s.Amount, o => o.MapFrom(t => t.TicketCount));
 
+            CreateMap<LeaderboardRankingTicket, LeaderboardOtherUserScoresReadServiceModel>()
+            .ForMember(s => s.Amount, o => o.MapFrom(t => t.TicketCount));
+
             // Read Service Model => Read Service Model
             CreateMap<LeaderboardUserScoresReadServiceModel, LeaderboardReadServiceModel>()
                 .ForMember(s => s.UserStats, o => o.MapFrom(t => t))

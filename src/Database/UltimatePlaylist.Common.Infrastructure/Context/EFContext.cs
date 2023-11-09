@@ -97,6 +97,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
 
         public DbSet<TicketCount> TicketCount { get; set; }
 
+        public DbSet<LeaderboardRankingTicket> LeaderboardTicket { get; set; }
+
         #endregion
 
         #region Builder
@@ -117,6 +119,7 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
             builder.Entity<WinnersInformationEntity>(eb => eb.ToView("DailyCashWinners"));
             builder.Entity<WinnersAlternateInformationEntity>(eb => eb.ToView("DailyCashWinnersAlternate"));
             builder.Entity<TicketCount>().HasNoKey();
+            builder.Entity<LeaderboardRankingTicket>().HasNoKey();
         }
 
         #endregion
