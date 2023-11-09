@@ -28,6 +28,8 @@ namespace UltimatePlaylist.Services.Ticket
 
         private readonly Lazy<IRepository<WinningEntity>> WinningRepositoryProvider;
 
+        private readonly Lazy<ITicketProcedureRepository> TicketProcedureRepositoryProvider;
+
         private readonly Lazy<IMapper> MapperProvider;
 
         private readonly PlaylistConfig PlaylistConfig;
@@ -40,10 +42,12 @@ namespace UltimatePlaylist.Services.Ticket
             Lazy<IMapper> mapperProvider,
             Lazy<IRepository<TicketEntity>> ticketRepositoryProvider,
             Lazy<IRepository<WinningEntity>> winningRepositoryProvider,
+            Lazy<ITicketProcedureRepository> ticketProcedureRepositoryProvider,
             IOptions<PlaylistConfig> playlistConfig)
         {
             TicketRepositoryProvider = ticketRepositoryProvider;
             WinningRepositoryProvider = winningRepositoryProvider;
+            TicketProcedureRepositoryProvider = ticketProcedureRepositoryProvider;
             MapperProvider = mapperProvider;
             PlaylistConfig = playlistConfig.Value;
         }
@@ -55,6 +59,8 @@ namespace UltimatePlaylist.Services.Ticket
         private IRepository<TicketEntity> TicketRepository => TicketRepositoryProvider.Value;
 
         private IRepository<WinningEntity> WinningRepository => WinningRepositoryProvider.Value;
+
+        private ITicketProcedureRepository TicketProcedureRepository => TicketProcedureRepositoryProvider.Value;
 
         private IMapper Mapper => MapperProvider.Value;
 
@@ -69,34 +75,6 @@ namespace UltimatePlaylist.Services.Ticket
             var currentDate = todayDate.Add(PlaylistConfig.StartDateOffSet);
             var nextDate = (now < currentDate) ? currentDate : currentDate.AddDays(1);
 
-            var avaiableTodayTicketsCount = await TicketRepository.CountAsync(new TicketSpecification()
-                .WithUser()
-                .BySongHistoryUserExternalIdUsingSongRelation(userExternalId)
-                .ByTodaysTickets()
-                .ByType(TicketType.Daily)
-                .OnlyNotUsed());
-
-            avaiableTodayTicketsCount += await TicketRepository.CountAsync(new TicketSpecification()
-                .WithUserByPlaylist()
-                .ByUserExternalIdUsingPlaylistRelation(userExternalId)
-                .ByTodaysTickets()
-                .ByType(TicketType.Daily)
-                .OnlyNotUsed());
-
-            var avaiableJackpotTicketsCount = await TicketRepository.CountAsync(new TicketSpecification()
-                .WithUser()
-                .BySongHistoryUserExternalIdUsingSongRelation(userExternalId)
-                .ByTodaysTickets()
-                .ByType(TicketType.Jackpot)
-                .OnlyNotUsed());
-
-            avaiableJackpotTicketsCount += await TicketRepository.CountAsync(new TicketSpecification()
-                .WithUserByPlaylist()
-                .ByUserExternalIdUsingPlaylistRelation(userExternalId)
-                .ByTodaysTickets()
-                .ByType(TicketType.Jackpot)
-                .OnlyNotUsed());
-
             var notClaimedWinnings = await WinningRepository.ListAsync(new WinningSpecification().Pagination(new Pagination())
               .ByUserExternalId(userExternalId)
               .WithGame()
@@ -107,10 +85,12 @@ namespace UltimatePlaylist.Services.Ticket
               .WithGame()
               .ByStatus(WinningStatus.Paid));
 
+            var ticketCount = await TicketProcedureRepository.TicketCount(userExternalId);
+
             var ticketsStatsReadServiceModel = new TicketsStatsReadServiceModel()
             {
-                TicketsAmountForTodayDrawing = avaiableTodayTicketsCount,
-                TicketsAmountForJackpotDrawing = avaiableJackpotTicketsCount,
+                TicketsAmountForTodayDrawing = ticketCount.CountDaily,
+                TicketsAmountForJackpotDrawing = ticketCount.CountJackpot,
                 PlaylistExpirationTimeStamp = nextDate,
                 NextDrawingTimeStamp = nextDate,
                 Rewards = Mapper.Map<List<ActiveDrawingRewardReadServiceModel>>(notClaimedWinnings),

@@ -29,5 +29,8 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Ticket
         Task<List<DeactivatedUsers>> GetDeactivateUsersAdded();        
 
         Task<Result<ActiveUsers>> GetActiveUserTokensCount();
+
+        Task<TicketCount> TicketCount(Guid userExternalId);
+
     }
 }

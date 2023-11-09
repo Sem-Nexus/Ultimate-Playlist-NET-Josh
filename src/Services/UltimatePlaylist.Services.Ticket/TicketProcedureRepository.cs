@@ -144,5 +144,29 @@ namespace UltimatePlaylist.Services.Song
 
             return data.OrderByDescending(item => item.PrizeTier).ToList();
         }
+
+        public async Task<TicketCount> TicketCount(Guid userExternalId)
+        {
+
+            string timezoneId = "US Eastern Standard Time";
+            var now = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, timezoneId); // converted utc timezone to EST timezone
+            TimeZoneInfo targetTimezone = TimeZoneInfo.FindSystemTimeZoneById(timezoneId);
+            double offsetHours = targetTimezone.GetUtcOffset(DateTime.UtcNow).TotalHours;
+            string ticketType = "Daily";
+
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[TicketCountBySongHistory]");
+            builder.Append($"@offsetHours = '{offsetHours}',");
+            builder.Append($"@DateNow = '{now.Date}',");
+            builder.Append($"@ExternalId = '{userExternalId}',");
+            builder.Append($"@TicketType = '{ticketType}'");
+
+            var result = await Context
+                .TicketCount
+                .FromSqlRaw(builder.ToString()).ToListAsync();
+
+            return result.FirstOrDefault();
+
+        }
     }
 }

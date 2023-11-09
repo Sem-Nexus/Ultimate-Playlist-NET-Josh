@@ -95,6 +95,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
 
         public DbSet<DeactivatedUsers> DeactivatedUsers { get; set; }
 
+        public DbSet<TicketCount> TicketCount { get; set; }
+
         #endregion
 
         #region Builder
@@ -114,6 +116,7 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
             builder.Entity<MedianUsersAge>().HasNoKey();
             builder.Entity<WinnersInformationEntity>(eb => eb.ToView("DailyCashWinners"));
             builder.Entity<WinnersAlternateInformationEntity>(eb => eb.ToView("DailyCashWinnersAlternate"));
+            builder.Entity<TicketCount>().HasNoKey();
         }
 
         #endregion
