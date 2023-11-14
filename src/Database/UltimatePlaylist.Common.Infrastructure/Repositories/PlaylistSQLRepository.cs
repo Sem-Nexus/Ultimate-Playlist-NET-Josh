@@ -29,5 +29,26 @@ namespace UltimatePlaylist.Database.Infrastructure.Repositories
 
             await sqlCommand.ExecuteNonQueryAsync();
         }
+
+        public async Task UpdatePlaylistStateAndCurrentSong(
+                string playlistState,
+                string userExternalId,
+                string playlistExternalId,
+                string currentSongExternalId
+            )
+        {
+            await using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var sqlCommand = new SqlCommand("SetPlaylistAndSongState", connection);
+            sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+
+            sqlCommand.Parameters.Add(new SqlParameter("@playlistState", value: playlistState));
+            sqlCommand.Parameters.Add(new SqlParameter("@userExternalId", value: userExternalId));
+            sqlCommand.Parameters.Add(new SqlParameter("@playlistExternalId", value: playlistExternalId));
+            sqlCommand.Parameters.Add(new SqlParameter("@currentSongExternalId", value: currentSongExternalId));
+
+            await sqlCommand.ExecuteNonQueryAsync();
+        }
     }
 }

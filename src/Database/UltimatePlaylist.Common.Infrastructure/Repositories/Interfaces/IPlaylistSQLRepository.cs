@@ -9,5 +9,11 @@ namespace UltimatePlaylist.Database.Infrastructure.Repositories.Interfaces
     public interface IPlaylistSQLRepository
     {
         Task UpdatePlaylistState(string playlistState, long playlistId);
+        Task UpdatePlaylistStateAndCurrentSong(
+               string playlistState,
+               string userExternalId,
+               string currentSongExternalId,
+               string playlistExternalId
+          );
     }
 }

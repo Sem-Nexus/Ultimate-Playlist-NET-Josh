@@ -235,10 +235,22 @@ namespace UltimatePlaylist.Services.Analytics
             }
 
             await UserPlaylistStore.Set(userExternalId, playlistReadServiceModel);
-            var playlist = await UserPlaylistRepository.FirstOrDefaultAsync(new UserPlaylistSpecification()
+            await UserPlaylistSqlRepository.UpdatePlaylistStateAndCurrentSong(
+                playlistReadServiceModel.State.ToString(),
+                userExternalId.ToString(),
+                saveAnalyticsDataWriteServiceModel.PlaylistExternalId.ToString(),
+                saveAnalyticsDataWriteServiceModel.SongExternalId.ToString()
+                );
+
+            /*
+              var playlist = await UserPlaylistRepository.FirstOrDefaultAsync(new UserPlaylistSpecification()
                 .ByExternalId(saveAnalyticsDataWriteServiceModel.PlaylistExternalId)
                 .OrderByCreatedDescending()
                 .WithSongs());
+
+            Logger.LogInformation("\n\n SavePlaylistStateAsync.while-----------------------------------------------\n\n");
+
+
             if (playlist is not null)
             {
                 bool isSuccess = false;
@@ -248,12 +260,14 @@ namespace UltimatePlaylist.Services.Analytics
                 { // TODO:
                     try
                     {
+
                         playlist.State = playlistReadServiceModel.State;
                         foreach (var userPlaylistSong in playlist.UserPlaylistSongs)
                         {
                             userPlaylistSong.IsCurrent = userPlaylistSong.Song.ExternalId == saveAnalyticsDataWriteServiceModel.SongExternalId;
                         }
-                        await UserPlaylistSqlRepository.UpdatePlaylistState(playlist.State.ToString(), playlist.Id);
+                        var playlistStateStr = playlist.State.ToString();
+                        await UserPlaylistSqlRepository.UpdatePlaylistState(playlistStateStr, playlist.Id);
 
                         isSuccess = true;
                     }
@@ -264,7 +278,7 @@ namespace UltimatePlaylist.Services.Analytics
                         Thread.Sleep(3000);
                     }
                 }
-            }
+            }*/
         }
 
         private async Task<Result<bool>> CheckIfShouldEarnTicketsForThreeSongsWithoutSkip(
