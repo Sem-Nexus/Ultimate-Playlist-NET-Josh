@@ -29,6 +29,9 @@ namespace UltimatePlaylist.Services.Games
               Cron.Daily(playlistConfig.StartDateOffSet.Hours, playlistConfig.StartDateOffSet.Minutes + 17),
               timeZone: TimeZoneInfo.FindSystemTimeZoneById(playlistConfig.TimeZone));
 
+            recurringJobManager.AddOrUpdate<DailyCashTicketsServiceAndRaffleJob>("Backup Tickets and Update Leaderboard", (p) => p.BackupTicketsAndUpdateLeaderboard(),
+              Cron.Daily(playlistConfig.StartDateOffSet.Hours, playlistConfig.StartDateOffSet.Minutes + 30),
+              timeZone: TimeZoneInfo.FindSystemTimeZoneById(playlistConfig.TimeZone));
         }
 
         public static void RemoveDaliCashDrawingJobs(IRecurringJobManager recurringJobManager)

@@ -685,6 +685,10 @@ namespace UltimatePlaylist.Services.Games.Jobs
             }
         }
 
-
+        public async Task BackupTicketsAndUpdateLeaderboard()
+        {
+            await TicketProcedureRepository.BackupTicketsAndUpdateLeaderboard();
+            return;
+        }
     }
 }

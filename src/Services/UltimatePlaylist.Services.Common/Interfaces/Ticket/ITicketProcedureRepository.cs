@@ -34,5 +34,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Ticket
 
         Task<List<LeaderboardRankingTicket>> LeaderboardRankingTicket(Guid userExternalId);
 
+        Task BackupTicketsAndUpdateLeaderboard();
+
     }
 }

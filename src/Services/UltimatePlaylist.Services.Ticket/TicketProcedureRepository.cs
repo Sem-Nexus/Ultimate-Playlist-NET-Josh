@@ -182,5 +182,34 @@ namespace UltimatePlaylist.Services.Song
             return result;
 
         }
+
+        public async Task BackupTicketsAndUpdateLeaderboard()
+        {
+
+            await BackupTickets();
+            await UpdateLeaderboard();
+
+            return;
+        }
+
+        public async Task BackupTickets()
+        {
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[BackupDailyUserTickets]");
+
+            await Context.Database.ExecuteSqlRawAsync(builder.ToString());
+
+            return;
+        }
+
+        public async Task UpdateLeaderboard()
+        {
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[UserTicketsCount]");
+
+            await Context.Database.ExecuteSqlRawAsync(builder.ToString());
+
+            return;
+        }
     }
 }
