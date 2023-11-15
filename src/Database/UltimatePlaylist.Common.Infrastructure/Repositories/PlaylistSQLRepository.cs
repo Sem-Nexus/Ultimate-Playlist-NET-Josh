@@ -34,7 +34,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Repositories
                 string playlistState,
                 string userExternalId,
                 string playlistExternalId,
-                string currentSongExternalId
+                string currentSongExternalId,
+                string actualListeningSecond
             )
         {
             await using var connection = new SqlConnection(_connectionString);
@@ -47,6 +48,7 @@ namespace UltimatePlaylist.Database.Infrastructure.Repositories
             sqlCommand.Parameters.Add(new SqlParameter("@userExternalId", value: userExternalId));
             sqlCommand.Parameters.Add(new SqlParameter("@playlistExternalId", value: playlistExternalId));
             sqlCommand.Parameters.Add(new SqlParameter("@currentSongExternalId", value: currentSongExternalId));
+            sqlCommand.Parameters.Add(new SqlParameter("@actualListeningSecond", value: actualListeningSecond));
 
             await sqlCommand.ExecuteNonQueryAsync();
         }

@@ -13,7 +13,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Repositories.Interfaces
                string playlistState,
                string userExternalId,
                string currentSongExternalId,
-               string playlistExternalId
+               string playlistExternalId,
+               string actualListeningSecond
           );
     }
 }

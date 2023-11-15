@@ -215,6 +215,7 @@ namespace UltimatePlaylist.Services.Analytics
         {
 
             playlistReadServiceModel.CurrentSongExternalId = saveAnalyticsDataWriteServiceModel.SongExternalId;
+            playlistReadServiceModel.ActualListeningSecond = saveAnalyticsDataWriteServiceModel.ActualListeningSecond;
 
             if (playlistReadServiceModel.State == PlaylistState.NotStartedYet)
             {
@@ -239,7 +240,8 @@ namespace UltimatePlaylist.Services.Analytics
                 playlistReadServiceModel.State.ToString(),
                 userExternalId.ToString(),
                 saveAnalyticsDataWriteServiceModel.PlaylistExternalId.ToString(),
-                saveAnalyticsDataWriteServiceModel.SongExternalId.ToString()
+                saveAnalyticsDataWriteServiceModel.SongExternalId.ToString(),
+                saveAnalyticsDataWriteServiceModel.ActualListeningSecond.ToString()
                 );
 
             /*
