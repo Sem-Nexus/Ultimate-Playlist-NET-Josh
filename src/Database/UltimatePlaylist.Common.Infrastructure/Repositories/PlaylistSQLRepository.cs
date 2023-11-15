@@ -42,7 +42,7 @@ namespace UltimatePlaylist.Database.Infrastructure.Repositories
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            var sqlCommand = new SqlCommand("SetPlaylistAndSongState3", connection);
+            var sqlCommand = new SqlCommand("SetPlaylistAndSongState", connection);
             sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
             sqlCommand.Parameters.Add(new SqlParameter("@playlistState", value: playlistState));
