@@ -245,7 +245,8 @@ namespace UltimatePlaylist.Services.Analytics
                 userExternalId.ToString(),
                 saveAnalyticsDataWriteServiceModel.PlaylistExternalId.ToString(),
                 saveAnalyticsDataWriteServiceModel.SongExternalId.ToString(),
-                saveAnalyticsDataWriteServiceModel.ActualListeningSecond.ToString()
+                saveAnalyticsDataWriteServiceModel.ActualListeningSecond.ToString(),
+                saveAnalyticsDataWriteServiceModel.EventType.ToString()
                 );
 
             /*

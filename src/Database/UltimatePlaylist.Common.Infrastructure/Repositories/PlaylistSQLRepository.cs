@@ -35,13 +35,14 @@ namespace UltimatePlaylist.Database.Infrastructure.Repositories
                 string userExternalId,
                 string playlistExternalId,
                 string currentSongExternalId,
-                string actualListeningSecond
+                string actualListeningSecond,
+                string playlistEvent
             )
         {
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            var sqlCommand = new SqlCommand("SetPlaylistAndSongState", connection);
+            var sqlCommand = new SqlCommand("SetPlaylistAndSongState3", connection);
             sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
             sqlCommand.Parameters.Add(new SqlParameter("@playlistState", value: playlistState));
@@ -49,6 +50,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Repositories
             sqlCommand.Parameters.Add(new SqlParameter("@playlistExternalId", value: playlistExternalId));
             sqlCommand.Parameters.Add(new SqlParameter("@currentSongExternalId", value: currentSongExternalId));
             sqlCommand.Parameters.Add(new SqlParameter("@actualListeningSecond", value: actualListeningSecond));
+            sqlCommand.Parameters.Add(new SqlParameter("@playlistEvent", value: playlistEvent));
+
 
             await sqlCommand.ExecuteNonQueryAsync();
         }
