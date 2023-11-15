@@ -55,6 +55,7 @@ namespace UltimatePlaylist.Services.UserSong.Repositories
                     AudioFileStreamingUrl = song.AudioFile.StreamingUrl,
                     CoverFileUrl = song.CoverFile.Url,
                     Updated = song.Updated,
+                    SecondsListened = userPlaylistSongs.FirstOrDefault(s => s.SongId == song.Id) != null ? userPlaylistSongs.FirstOrDefault(s => s.SongId == song.Id).SecondsListened : 0,
                     IsSkipped = userPlaylistSongs.FirstOrDefault(s => s.SongId == song.Id) != null ? userPlaylistSongs.FirstOrDefault(s => s.SongId == song.Id).IsSkipped : false,
                     IsAddedToAppleMusic = userSongHistory.FirstOrDefault(s => s.SongId == song.Id) != null && userSongHistory.FirstOrDefault(s => s.SongId == song.Id).IsAddedToAppleMusic,
                     IsAddedToSpotify = userSongHistory.FirstOrDefault(s => s.SongId == song.Id) != null && userSongHistory.FirstOrDefault(s => s.SongId == song.Id).IsAddedToSpotify,

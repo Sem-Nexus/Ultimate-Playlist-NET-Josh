@@ -28,7 +28,8 @@ namespace UltimatePlaylist.MobileApi.Mappings
             // Read service model => Response model
             CreateMap<PlaylistReadServiceModel, PlaylistResponseModel>();
             CreateMap<UserSongReadServiceModel, UserSongResponseModel>()
-                .ForMember(s => s.UserRating, o => o.MapFrom(t => t.UserRating.HasValue ? t.UserRating : 0));
+                .ForMember(s => s.UserRating, o => o.MapFrom(t => t.UserRating.HasValue ? t.UserRating : 0))
+                .ForMember(s => s.SecondsListened, o => o.MapFrom(t => t.SecondsListened.HasValue ? t.SecondsListened : 0));
 
             CreateMap<PlaylistHistoryReadServiceModel, PlaylistHistoryResponseModel>()
                 .ForMember(s => s.DateTimeStamp, o => o.MapFrom(t => t.StartDate))

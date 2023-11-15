@@ -24,6 +24,8 @@ namespace UltimatePlaylist.MobileApi.Models.Playlist
 
         public int PlaylistExpirationCountDown { get; set; }
 
+        public int? ActualListeningSecond { get; set; }
+
         public List<UserSongResponseModel> Songs { get; set; }
     }
 }
