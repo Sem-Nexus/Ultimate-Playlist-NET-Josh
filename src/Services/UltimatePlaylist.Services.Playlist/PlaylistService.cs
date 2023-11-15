@@ -213,6 +213,7 @@ namespace UltimatePlaylist.Service.Playlist
                     .Bind(async _ => await UserSongService.GetUserSongsForPlaylistAsync(userExternalId, userPlaylist.ExternalId))
                     .Tap(userSongs => playlistReadServiceModel.Songs = userSongs.ToList())
                     .Tap(userSongs => playlistReadServiceModel.CurrentSongExternalId = userSongs.First(s => s.IsCurrent).ExternalId)
+                    .Tap(_ => playlistReadServiceModel.ActualListeningSecond = playlistReadServiceModel.Songs.FirstOrDefault(s => s.IsCurrent)?.SecondsListened)
                     .Tap(_ => UserPlaylistStore.Set(userExternalId, playlistReadServiceModel))
                     .Map(userSongs => playlistReadServiceModel)
                     : await CreateTodaysPlaylistForUserAsync(userExternalId, today, playlistReadServiceModel);
@@ -244,6 +245,7 @@ namespace UltimatePlaylist.Service.Playlist
                 .Bind(async userPlaylist => await UserSongService.GetUserSongsForPlaylistAsync(userExternalId, userPlaylist.ExternalId))
                 .Tap(userSongs => playlistReadServiceModel.Songs = userSongs.Where(i => i.AudioFileStreamingUrl != null && i.AudioFileStreamingUrl.Length > 0).ToList())
                 .Tap(_ => playlistReadServiceModel.CurrentSongExternalId = playlistReadServiceModel.Songs.FirstOrDefault(s => s.IsCurrent)?.ExternalId)
+                .Tap(_ => playlistReadServiceModel.ActualListeningSecond = playlistReadServiceModel.Songs.FirstOrDefault(s => s.IsCurrent)?.SecondsListened)
                 .Tap(_ => UserPlaylistStore.Set(userExternalId, playlistReadServiceModel))
                 .Map(userSongs => playlistReadServiceModel);
         }

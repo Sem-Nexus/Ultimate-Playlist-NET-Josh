@@ -21,6 +21,8 @@ namespace UltimatePlaylist.Services.Common.Models.Playlist
 
         public int PlaylistExpirationCountDown { get; set; } = 0;
 
+        public int? ActualListeningSecond { get; set; }
+
         public List<UserSongReadServiceModel> Songs { get; set; }
     }
 }

@@ -31,5 +31,7 @@ namespace UltimatePlaylist.MobileApi.Models.Song
         public bool IsSkipped { get; set; }
 
         public TimeSpan Duration { get; set; }
+
+        public int? SecondsListened { get; set; }
     }
 }

@@ -38,5 +38,7 @@ namespace UltimatePlaylist.Services.Common.Models.Song
         public bool IsCurrent { get; set; }
 
         public DateTime? AddedToUserPlaylistDate { get; set; }
+
+        public int? SecondsListened { get; set; }
     }
 }
