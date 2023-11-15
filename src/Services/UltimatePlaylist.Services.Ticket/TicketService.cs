@@ -40,6 +40,8 @@ namespace UltimatePlaylist.Services.Ticket
 
         private readonly Lazy<ITicketStatsService> TicketStatsServiceProvider;
 
+        private readonly Lazy<ITicketProcedureRepository> TicketProcedureRepositoryProvider;
+
         private readonly TicketConfig TicketConfig;
 
         #endregion
@@ -53,6 +55,7 @@ namespace UltimatePlaylist.Services.Ticket
             Lazy<IRepository<UserSongHistoryEntity>> userSongHistoryRepositoryProvider,
             Lazy<IReadOnlyRepository<UserPlaylistEntity>> userPlaylistRepositoryProvider,
             Lazy<ITicketStatsService> ticketStatsServiceProvider,
+            Lazy<ITicketProcedureRepository> ticketProcedureRepositoryProvider,
             IOptions<TicketConfig> ticketConfigOptions)
         {
             TicketRepositoryProvider = ticketRepositoryProvider;
@@ -62,6 +65,7 @@ namespace UltimatePlaylist.Services.Ticket
             UserPlaylistRepositoryProvider = userPlaylistRepositoryProvider;
             TicketStatsServiceProvider = ticketStatsServiceProvider;
             TicketConfig = ticketConfigOptions.Value;
+            TicketProcedureRepositoryProvider = ticketProcedureRepositoryProvider;
         }
 
         #endregion
@@ -79,6 +83,8 @@ namespace UltimatePlaylist.Services.Ticket
         private IReadOnlyRepository<UserPlaylistEntity> UserPlaylistRepository => UserPlaylistRepositoryProvider.Value;
 
         private ITicketStatsService TicketStatsService => TicketStatsServiceProvider.Value;
+
+        private ITicketProcedureRepository TicketProcedureRepository => TicketProcedureRepositoryProvider.Value;
 
         #endregion
 
@@ -180,6 +186,21 @@ namespace UltimatePlaylist.Services.Ticket
                 .ByEarnedType(TicketEarnedType.ThirtySecondsOfListenedSong)
                 .OnlyNotUsed());
             return counts;
+        }
+
+        public async Task<Result<bool>> FastAddUserTicketForPlaylistActionAsync(Guid userExternalId, AddTicketWriteServiceModel addTicketWriteServiceModel)
+        {
+            await TicketProcedureRepository.AddTicketForPlaylistActionAsync(
+                new AddTicketForPlaylistActionServiceModel()
+                {
+                    UserExternalId = userExternalId,
+                    PlaylistExternalId = addTicketWriteServiceModel.PlaylistExternalId,
+                    SongExternalId = addTicketWriteServiceModel.ExternalId,
+                    EarnedType = addTicketWriteServiceModel.EarnedType,
+                    TicketType = addTicketWriteServiceModel.Type,
+                    TicketQty = EarnedTicketsAmountByEarnedType(addTicketWriteServiceModel.EarnedType)
+                });
+            return Result.Success(true);
         }
 
         #endregion

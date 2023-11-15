@@ -5,6 +5,7 @@ using UltimatePlaylist.Database.Infrastructure.Entities.Identity;
 using UltimatePlaylist.Database.Infrastructure.Entities.Ticket;
 using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Models.Games;
+using UltimatePlaylist.Services.Common.Models.Ticket;
 
 #endregion
 
@@ -35,6 +36,8 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Ticket
         Task<List<LeaderboardRankingTicket>> LeaderboardRankingTicket(Guid userExternalId);
 
         Task BackupTicketsAndUpdateLeaderboard();
+
+        Task AddTicketForPlaylistActionAsync(AddTicketForPlaylistActionServiceModel addTickets);
 
     }
 }

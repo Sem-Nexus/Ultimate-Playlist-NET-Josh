@@ -12,6 +12,7 @@ using UltimatePlaylist.Database.Infrastructure.Entities.Games.Specifications;
 using UltimatePlaylist.Database.Infrastructure.Entities.Ticket;
 using UltimatePlaylist.Database.Infrastructure.Entities.Ticket.Specifications;
 using UltimatePlaylist.Database.Infrastructure.Repositories.Interfaces;
+using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Interfaces.Ticket;
 using UltimatePlaylist.Services.Common.Models.Reward;
 using UltimatePlaylist.Services.Common.Models.Ticket;
@@ -99,6 +100,13 @@ namespace UltimatePlaylist.Services.Ticket
 
             return ticketsStatsReadServiceModel;
         }
+
+        public async Task<Result<TicketCount>> getTicketCount(Guid userExternalId)
+        {
+            var ticketCount = await TicketProcedureRepository.TicketCount(userExternalId);
+            return ticketCount;
+        }
+
         //new2022-10-14-from
         public async Task<Result<int?>> ReverseTicketStatus(Guid ExternalId, int isErrorTriggered)
         {

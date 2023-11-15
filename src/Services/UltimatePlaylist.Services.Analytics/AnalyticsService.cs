@@ -126,8 +126,11 @@ namespace UltimatePlaylist.Services.Analytics
             SaveAnalyticsDataWriteServiceModel saveAnalyticsDataWriteServiceModel)
         {
             return await GetUserAsync(userExternalId)
+                .Tap(_ => Logger.LogInformation("\n\n\n SaveAnalyticsDataAsync  ---------------------------------------- \n\n\n"))
                 .Check(async user => await SaveAnalyticsDataAsync(user, saveAnalyticsDataWriteServiceModel))
+                .Tap(_ => Logger.LogInformation("\n\n\n GetCurrentSkipDataAsync  ---------------------------------------- \n\n\n") )
                 .Map(async _ => await SongSkippingDataService.GetCurrentSkipDataAsync(saveAnalyticsDataWriteServiceModel.PlaylistExternalId, userExternalId))
+                .Tap(_ => Logger.LogInformation("\n\n\n GetEarnedTicketsResponse  ---------------------------------------- \n\n\n"))
                 .Map(async skipData => Mapper.Map(skipData, await GetEarnedTicketsResponse(userExternalId)));
         }
 
@@ -152,8 +155,8 @@ namespace UltimatePlaylist.Services.Analytics
                 AnalitycsEventType.ThirtySecondsOfSong => await SavePlaylisStateAndRewardTicketAsync(user, saveAnalyticsDataWriteServiceModel),
                 AnalitycsEventType.SixtySecondsOfSong => await SavePlaylisStateAndRewardTicketAsync(user, saveAnalyticsDataWriteServiceModel),
                 AnalitycsEventType.EntireSong => await SavePlaylisStateAndRewardTicketAsync(user, saveAnalyticsDataWriteServiceModel)
-                    .Tap(async () => await SongAntibotService.AddNoActionAsync(user.ExternalId))
-                    .Bind(async () => await SetSongStatus(user.ExternalId, saveAnalyticsDataWriteServiceModel)),
+                    .Tap(async () => await SongAntibotService.AddNoActionAsync(user.ExternalId)),
+                    //.Bind(async () => await SetSongStatus(user.ExternalId, saveAnalyticsDataWriteServiceModel)),
                 AnalitycsEventType.BreakListening => await SavePlaylisStateWithoutTickets(user, saveAnalyticsDataWriteServiceModel),
                 AnalitycsEventType.SkipSong => await SaveSongSkipAsync(user, saveAnalyticsDataWriteServiceModel),
                 AnalitycsEventType.ExpirationOfSkipRefresh => Result.Success(),
@@ -173,7 +176,7 @@ namespace UltimatePlaylist.Services.Analytics
             SaveAnalyticsDataWriteServiceModel saveAnalyticsDataWriteServiceModel)
         {
             PlaylistReadServiceModel userPlaylist = default;
-
+            Logger.LogInformation("\n\n\n SavePlaylisStateAndRewardTicketAsync  ---------------------------------------- \n\n\n");
             return await PlaylistService.GetTodaysPlaylist(user.ExternalId)
                 .Tap(userPlaylistReadServiceModel => userPlaylist = userPlaylistReadServiceModel)
                 .Check(async userPlaylist => await CheckIfShouldEarnUltimateTicketsAsync(user.ExternalId, saveAnalyticsDataWriteServiceModel, userPlaylist))
@@ -199,10 +202,11 @@ namespace UltimatePlaylist.Services.Analytics
 
         private async Task<AnalyticsLastEarnedTicketsReadServiceModel> GetEarnedTicketsResponse(Guid userExternalId)
         {
-            var lastEarnedTickets = await TicketStatsService.UserTicketStatsAsync(userExternalId);
+            //var lastEarnedTickets = await TicketStatsService.UserTicketStatsAsync(userExternalId);
+            var lastEarnedTickets = await TicketStatsService.getTicketCount(userExternalId);
             return new AnalyticsLastEarnedTicketsReadServiceModel()
             {
-                LatestEarnedTickets = lastEarnedTickets.IsSuccess ? lastEarnedTickets.Value.TicketsAmountForTodayDrawing : 0,
+                LatestEarnedTickets = lastEarnedTickets.IsSuccess ? lastEarnedTickets.Value.CountDaily: 0,
                 IsAntiBotSystemActive = await SongAntibotService.ShouldActivateAsync(userExternalId),
             };
         }
@@ -356,11 +360,12 @@ namespace UltimatePlaylist.Services.Analytics
             return Result.Success(false);
         }
 
-        private async Task<Result<EarnedTicketsReadServiceModel>> AddTickets(
+        private async Task<Result<bool>> AddTickets(
             Guid userExternalId,
             SaveAnalyticsDataWriteServiceModel saveAnalyticsDataWriteServiceModel)
         {
-            return await TicketService.AddUserTicketAsync(
+            Logger.LogInformation("\n\n\n Add Tickets  ---------------------------------------- \n\n\n");
+            return await TicketService.FastAddUserTicketForPlaylistActionAsync(// AddUserTicketAsync(
                 userExternalId,
                 new AddTicketWriteServiceModel()
                 {
@@ -368,11 +373,14 @@ namespace UltimatePlaylist.Services.Analytics
                     PlaylistExternalId = saveAnalyticsDataWriteServiceModel.PlaylistExternalId,
                     Type = TicketType.Daily,
                     EarnedType = GetTicketEarnedType(saveAnalyticsDataWriteServiceModel.EventType),
-                });
+                })
+                .Tap(_=> Logger.LogInformation("\n\n\n Add Tickets End ---------------------------------------- \n\n\n") );
         }
 
         private async Task<Result> SetSongStatus(Guid userExternalId, SaveAnalyticsDataWriteServiceModel saveAnalyticsDataWriteServiceModel)
         {
+            Logger.LogInformation("\n\n\n SetSongStatus  ---------------------------------------- \n\n\n");
+
             var userPlaylistSong = await UserPlaylistSongRepository.FirstOrDefaultAsync(
                 new UserPlaylistSongSpecification()
                 .ByPlaylistExternalId(saveAnalyticsDataWriteServiceModel.PlaylistExternalId)
@@ -383,7 +391,9 @@ namespace UltimatePlaylist.Services.Analytics
 
             return await Result.SuccessIf(userPlaylistSong is not null, ErrorMessages.SongDoesNotExist)
                 .Tap(() => userPlaylistSong!.IsFinished = true)// 2020-10-04 fixed by Mohitt
-                .Tap(async () => await UserPlaylistSongRepository.UpdateAndSaveAsync(userPlaylistSong));
+                .Tap(async () => await UserPlaylistSongRepository.UpdateAndSaveAsync(userPlaylistSong))
+                .Tap(()=> Logger.LogInformation("\n\n\n SetSongStatus END ---------------------------------------- \n\n\n"));
+            ;
         }
 
         private TicketEarnedType GetTicketEarnedType(AnalitycsEventType analitycsEventType)

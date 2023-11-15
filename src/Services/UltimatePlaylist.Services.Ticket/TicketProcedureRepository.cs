@@ -9,6 +9,7 @@ using UltimatePlaylist.Database.Infrastructure.Entities.Ticket;
 using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Services.Common.Interfaces.Ticket;
 using UltimatePlaylist.Services.Common.Models.Games;
+using UltimatePlaylist.Services.Common.Models.Ticket;
 
 #endregion
 
@@ -210,6 +211,26 @@ namespace UltimatePlaylist.Services.Song
             await Context.Database.ExecuteSqlRawAsync(builder.ToString());
 
             return;
+        }
+
+        public async Task AddTicketForPlaylistActionAsync(
+            AddTicketForPlaylistActionServiceModel addTickets
+            )
+        {
+    
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[AddTicketForPlaylistActionAsync]");
+            builder.Append($"@UserExternalId = '{addTickets.UserExternalId.ToString()}',");
+            builder.Append($"@PlaylistExternalId = '{addTickets.PlaylistExternalId.ToString()}',");
+            builder.Append($"@SongExternalId = '{addTickets.SongExternalId.ToString()}',");
+            builder.Append($"@TicketType = '{addTickets.TicketType.ToString()}',");
+            builder.Append($"@EarnedType = '{addTickets.EarnedType.ToString()}',");
+            builder.Append($"@TicketQty = {addTickets.TicketQty.ToString()}");
+
+            await Context
+                .Database
+                .ExecuteSqlRawAsync(builder.ToString());
+
         }
     }
 }
