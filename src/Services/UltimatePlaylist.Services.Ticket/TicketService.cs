@@ -289,8 +289,8 @@ namespace UltimatePlaylist.Services.Ticket
         private async Task<UserSongHistoryEntity> GetOrAddUserSongHistoryAsync(User user, SongEntity songEntity)
         {
             var userSongHistory = await UserSongHistoryRepository.FirstOrDefaultAsync(new UserSongHistorySpecification()
-               .BySongExternalId(user.ExternalId)
-               .ByUserExternalId(songEntity.ExternalId)
+               .BySongExternalId(songEntity.ExternalId)
+               .ByUserExternalId(user.ExternalId)
                .OrderByCreatedDescending());
 
             if (userSongHistory is null)
