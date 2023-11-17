@@ -3,6 +3,7 @@
 using AutoMapper;
 using UltimatePlaylist.Database.Infrastructure.Entities.Games;
 using UltimatePlaylist.Database.Infrastructure.Entities.Ticket;
+using UltimatePlaylist.Database.Infrastructure.Views;
 using UltimatePlaylist.Games.Models.Raffle;
 using UltimatePlaylist.Services.Common.Models.Reward;
 
@@ -29,6 +30,14 @@ namespace UltimatePlaylist.Services.Ticket.Mapping
                         dest.UserExternalId = src.UserPlaylistSong.UserPlaylist.User.ExternalId;
                     }
                 });
+
+
+            CreateMap<DailyCashTicketsProcedureView, RaffleUserTicketReadServiceModel>()
+                .ForMember(p => p.UserFriendlyTicketId, opt => opt.MapFrom(m => m.TicketExternalId.ToString()))
+                .ForMember(p => p.UserTicketExternalId, opt => opt.MapFrom(m => m.TicketExternalId))
+                .ForMember(p => p.UserExternalId, opt => opt.MapFrom(m => m.UserExternalId))
+                ;
+                
 
             CreateMap<WinningEntity, CollectedDrawingRewardReadServiceModel>()
                 .ForMember(p => p.Name, opt => opt.MapFrom(m => m.Game.Type.ToString()))

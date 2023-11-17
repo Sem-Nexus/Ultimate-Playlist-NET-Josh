@@ -92,7 +92,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 {
                     GameDate = currentDate,
                 }))
-                .Bind(async () => await DailyCashTicketsService.GetTicketsForDailyCashAsync())
+                .Bind(async () => await DailyCashTicketsService.GetTicketsForDailyCashAsyncSP())
                 .Ensure(tickets => tickets.Any(), ErrorType.NoTicketsForGame.ToString())
                 .Tap(tickets => dailyCashTickets = tickets)
                 .Bind(tickets => RaffleService.GetRaffleWinners(tickets, Selections))

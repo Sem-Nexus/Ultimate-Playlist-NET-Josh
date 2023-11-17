@@ -232,5 +232,18 @@ namespace UltimatePlaylist.Services.Song
                 .ExecuteSqlRawAsync(builder.ToString());
 
         }
+
+        public async Task<List<DailyCashTicketsProcedureView>> GetDailyCashTickets()
+        {
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[GetDailyCashTickets]");
+
+            return await Context
+                .DailyCashTickets
+                .FromSqlRaw(builder.ToString())
+                .ToListAsync();
+
+        }
+
     }
 }

@@ -39,5 +39,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Ticket
 
         Task AddTicketForPlaylistActionAsync(AddTicketForPlaylistActionServiceModel addTickets);
 
+        Task<List<DailyCashTicketsProcedureView>> GetDailyCashTickets();
+
     }
 }
