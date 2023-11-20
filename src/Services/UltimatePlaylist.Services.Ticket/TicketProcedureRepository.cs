@@ -245,5 +245,23 @@ namespace UltimatePlaylist.Services.Song
 
         }
 
+        public async Task<int> GetDailyTicketsForRaffleCount()
+        {
+            DateTime startDay = DateTime.Now;
+            DateTime endDay = DateTime.Now.AddDays(-1);
+            var builder = new StringBuilder();
+            builder.Append("[dbo].[GetDailyTicketsCount]");
+            builder.Append($"@Start = '{endDay.ToString("yyyy-MM-dd") + " 03:59:59"}',");
+            builder.Append($"@End = '{startDay.ToString("yyyy-MM-dd") + " 04:00:00"}'");
+
+            var data = await Context
+                .GetDailyTicketsCount
+                .FromSqlRaw(builder.ToString())
+                .ToListAsync();
+
+            return data.FirstOrDefault().CountDaily;
+        }
+
+
     }
 }

@@ -100,6 +100,8 @@ namespace UltimatePlaylist.Database.Infrastructure.Context
         public DbSet<LeaderboardRankingTicket> LeaderboardTicket { get; set; }
 
         public DbSet<DailyCashTicketsProcedureView> DailyCashTickets { get; set; }
+        
+        public DbSet<TicketCount> GetDailyTicketsCount { get; set; }
 
         #endregion
 

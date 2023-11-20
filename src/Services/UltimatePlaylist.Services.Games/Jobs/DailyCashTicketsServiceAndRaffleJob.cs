@@ -161,7 +161,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
 
             try
             {
-                var tickets = await DailyCashTicketsService.GetTicketsForDailyCashAsync();
+                var tickets = await DailyCashTicketsService.GetTicketsForDailyCashAsyncSP();
                 int getWinnersLists = 0;
                 do
                 {                    
@@ -187,7 +187,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
                     }
                     else
                     {
-                        throw new Exception("Error in GetTicketsAndWinners");
+                        throw new Exception(ErrorType.NoTicketsForGame.ToString());
                     }                    
                 } while ((getWinnersLists < 2));
 
@@ -443,7 +443,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
                     ApplicationName = "ultimate-play-list-sn"
                 });
 
-                AddUserStatsRow(service, lastRow, totalUsers, date);
+                await AddUserStatsRow(service, lastRow, totalUsers, date);
                 AddUsersRow(service, dailyUsers);
                 await AddUsersWithTickers(service);
                 await AddDeactivateUsersRow(service, dailyDeactivateUsers);
@@ -477,7 +477,7 @@ namespace UltimatePlaylist.Services.Games.Jobs
             return newUsers;
         }
 
-        public  int AddUserStatsRow (SheetsService service, int lastRow, UserCountView totalUsers, string date)
+        public async Task<int>AddUserStatsRow (SheetsService service, int lastRow, UserCountView totalUsers, string date)
         {
             try
             {
@@ -493,12 +493,14 @@ namespace UltimatePlaylist.Services.Games.Jobs
                 lastRow = values?.Count ?? 0;
                 lastRow++;
                 
+                var dailyTickets = await TicketProcedureRepository.GetDailyTicketsForRaffleCount();
+
                 var percentage = (totalUsers.ActiveUsers / totalUsers.UserCount) * 100;
                 var valueRange = new ValueRange
                 {
                     Values = new List<IList<object>>
                     {
-                        new List<object> { date, totalUsers.Registrations, totalUsers.ActiveUsers, totalUsers.UserCount, null, totalUsers.Android, totalUsers.IOS }
+                        new List<object> { date, totalUsers.Registrations, totalUsers.ActiveUsers, totalUsers.UserCount, null, totalUsers.Android, totalUsers.IOS, dailyTickets }
                     }
                 };
 

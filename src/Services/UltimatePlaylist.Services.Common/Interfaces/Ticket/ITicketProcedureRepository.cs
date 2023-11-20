@@ -41,5 +41,7 @@ namespace UltimatePlaylist.Services.Common.Interfaces.Ticket
 
         Task<List<DailyCashTicketsProcedureView>> GetDailyCashTickets();
 
+        Task<int> GetDailyTicketsForRaffleCount();
+
     }
 }
